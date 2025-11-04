@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - Sistema de Agendamiento de Citas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">
+                <i class="bi bi-calendar-check-fill text-primary"></i>
+                Bienvenido al Sistema de Agendamiento
+            </h1>
+            <p class="lead text-muted">Agenda tus citas de manera fácil y rápida</p>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-plus-fill text-primary" style="font-size: 3rem;"></i>
+                        <h3 class="card-title mt-3">Agendar Nueva Cita</h3>
+                        <p class="card-text text-muted">
+                            Programa tu próxima cita de manera rápida y sencilla.
+                        </p>
+                        <a href="{% url 'citas:agendar_cita' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle"></i> Agendar Ahora
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar3 text-success" style="font-size: 3rem;"></i>
+                        <h3 class="card-title mt-3">Mis Citas</h3>
+                        <p class="card-text text-muted">
+                            Consulta y gestiona tus citas programadas.
+                        </p>
+                        <a href="{% url 'citas:mis_citas' %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-list-ul"></i> Ver Mis Citas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if user.es_asesor %}
+        <div class="card bg-info text-white shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h4><i class="bi bi-person-workspace"></i> Panel de Asesor</h4>
+                <p class="mb-3">Accede al panel de gestión de citas como asesor</p>
+                <a href="{% url 'citas:panel_asesor' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Ir al Panel
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
+                        <h3 class="card-title mt-3">Registrarse</h3>
+                        <p class="card-text text-muted">
+                            Crea tu cuenta para comenzar a agendar citas.
+                        </p>
+                        <a href="{% url 'usuarios:registro' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-plus"></i> Crear Cuenta
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-box-arrow-in-right text-success" style="font-size: 3rem;"></i>
+                        <h3 class="card-title mt-3">Iniciar Sesión</h3>
+                        <p class="card-text text-muted">
+                            ¿Ya tienes cuenta? Inicia sesión para continuar.
+                        </p>
+                        <a href="{% url 'usuarios:login' %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mt-5 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-info-circle"></i> Información del Servicio</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-clock"></i> Horarios de Atención</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Martes y Miércoles:</strong></li>
+                            <li class="ms-3">• Mañana: 7:00 AM - 12:40 PM</li>
+                            <li class="ms-3">• Tarde: 2:20 PM - 4:20 PM</li>
+                            <li class="mt-2"><strong>Jueves:</strong></li>
+                            <li class="ms-3">• Tarde: 2:00 PM - 4:20 PM</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-exclamation-triangle"></i> Políticas Importantes</h5>
+                        <ul class="list-unstyled">
+                            <li>• Duración de cada cita: <strong>20 minutos</strong></li>
+                            <li>• Agendar con mínimo <strong>1 hora</strong> de anticipación</li>
+                            <li>• Cancelar con mínimo <strong>2 horas</strong> de anticipación</li>
+                            <li>• Solo se permite <strong>1 cita activa</strong> por usuario</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
