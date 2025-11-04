@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendar Cita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .horarios-info {
+        background: #f8f9fa;
+        border-left: 4px solid #0d6efd;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .form-section {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="mb-4">
+            <a href="{% url 'citas:mis_citas' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Mis Citas
+            </a>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-calendar-plus"></i> Agendar Nueva Cita</h3>
+            </div>
+            <div class="card-body">
+                
+                <!-- Información de Horarios -->
+                <div class="horarios-info">
+                    <h5><i class="bi bi-clock"></i> Horarios Disponibles</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Martes y Miércoles:</strong>
+                            <ul class="mb-0">
+                                <li>Mañana: 7:00 AM - 12:40 PM</li>
+                                <li>Tarde: 2:20 PM - 4:20 PM</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Jueves:</strong>
+                            <ul class="mb-0">
+                                <li>Tarde: 2:00 PM - 4:20 PM</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="mb-0">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Duración:</strong> 20 minutos por cita | 
+                        <strong>Antelación:</strong> Mínimo 1 hora antes
+                    </p>
+                </div>
+
+                <!-- Formulario -->
+                <form method="post" class="form-section">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Fecha -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha.id_for_label }}" class="form-label">
+                                <i class="bi bi-calendar3"></i> Fecha de la Cita *
+                            </label>
+                            {{ form.fecha }}
+                            {% if form.fecha.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.fecha.errors %}
+                                        <small><i class="bi bi-exclamation-circle"></i> {{ error }}</small><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Solo Martes, Miércoles y Jueves
+                            </small>
+                        </div>
+
+                        <!-- Hora -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.hora_inicio.id_for_label }}" class="form-label">
+                                <i class="bi bi-clock"></i> Hora de Inicio *
+                            </label>
+                            {{ form.hora_inicio }}
+                            {% if form.hora_inicio.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.hora_inicio.errors %}
+                                        <small><i class="bi bi-exclamation-circle"></i> {{ error }}</small><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Ver horarios disponibles arriba
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Motivo -->
+                    <div class="mb-3">
+                        <label for="{{ form.motivo.id_for_label }}" class="form-label">
+                            <i class="bi bi-chat-left-text"></i> Motivo de la Cita (Opcional)
+                        </label>
+                        {{ form.motivo }}
+                        {% if form.motivo.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.motivo.errors %}
+                                    <small><i class="bi bi-exclamation-circle"></i> {{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Describe brevemente el motivo de tu cita (opcional)
+                        </small>
+                    </div>
+
+                    <!-- Errores generales del formulario -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            {% for error in form.non_field_errors %}
+                                {{ error }}<br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Información importante -->
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Importante</h6>
+                        <ul class="mb-0">
+                            <li>Solo puedes tener <strong>1 cita activa</strong> a la vez</li>
+                            <li>Debes agendar con <strong>1 hora</strong> de anticipación mínimo</li>
+                            <li>La cita tendrá una duración de <strong>20 minutos</strong></li>
+                            <li>Recibirás un correo de confirmación con el enlace de Teams</li>
+                        </ul>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'citas:mis_citas' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Confirmar Cita
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Guía visual de ejemplo -->
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6><i class="bi bi-lightbulb"></i> Ejemplo de Horarios</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Martes 7:00 AM</strong><br>
+                            <small class="text-muted">Finaliza: 7:20 AM</small>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Miércoles 10:00 AM</strong><br>
+                            <small class="text-muted">Finaliza: 10:20 AM</small>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Jueves 2:00 PM</strong><br>
+                            <small class="text-muted">Finaliza: 2:20 PM</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación de fecha en el cliente
+    document.addEventListener('DOMContentLoaded', function() {
+        const fechaInput = document.getElementById('{{ form.fecha.id_for_label }}');
+        
+        if (fechaInput) {
+            fechaInput.addEventListener('change', function() {
+                const fecha = new Date(this.value);
+                const dia = fecha.getDay();
+                
+                // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
+                if (dia !== 2 && dia !== 3 && dia !== 4) {
+                    alert('⚠️ Solo puedes seleccionar Martes, Miércoles o Jueves');
+                    this.value = '';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
