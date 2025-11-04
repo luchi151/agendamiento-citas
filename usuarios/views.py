@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
@@ -28,6 +28,13 @@ def login_view(request):
         form = AuthenticationForm()
     
     return render(request, 'usuarios/login.html', {'form': form})
+
+
+def logout_view(request):
+    """Vista para el logout de usuarios - Acepta GET y POST"""
+    logout(request)
+    messages.success(request, '¡Hasta pronto! Has cerrado sesión correctamente.')
+    return redirect('home')
 
 
 def registro_view(request):
