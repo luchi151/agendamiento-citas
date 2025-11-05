@@ -5,9 +5,262 @@ from django.utils import timezone
 from datetime import datetime, timedelta, time
 
 
+class Solicitante(models.Model):
+    """
+    Modelo para registrar personas que solicitan citas
+    No requiere cuenta de usuario, se identifica por documento
+    Se crea un nuevo registro por cada agendamiento para mantener historial
+    """
+    
+    # Opciones para los campos de selección
+    TIPO_DOCUMENTO_CHOICES = [
+        ('CC', 'Cédula de Ciudadanía'),
+        ('CE', 'Cédula de Extranjería'),
+        ('TI', 'Tarjeta de Identidad'),
+        ('PEP', 'Permiso Especial de Permanencia'),
+        ('RC', 'Registro Civil'),
+        ('PA', 'Pasaporte'),
+    ]
+    
+    SEXO_CHOICES = [
+        ('M', 'Masculino'),
+        ('F', 'Femenino'),
+        ('I', 'Intersexual'),
+    ]
+    
+    GENERO_CHOICES = [
+        ('hombre', 'Hombre'),
+        ('mujer', 'Mujer'),
+        ('no_binario', 'No binario'),
+        ('otro', 'Otro'),
+        ('prefiero_no_decir', 'Prefiero no decir'),
+    ]
+    
+    ORIENTACION_SEXUAL_CHOICES = [
+        ('heterosexual', 'Heterosexual'),
+        ('homosexual', 'Homosexual'),
+        ('bisexual', 'Bisexual'),
+        ('pansexual', 'Pansexual'),
+        ('asexual', 'Asexual'),
+        ('otro', 'Otro'),
+        ('prefiero_no_decir', 'Prefiero no decir'),
+    ]
+    
+    RANGO_EDAD_CHOICES = [
+        ('0-17', '0-17 años'),
+        ('18-25', '18-25 años'),
+        ('26-35', '26-35 años'),
+        ('36-45', '36-45 años'),
+        ('46-55', '46-55 años'),
+        ('56-65', '56-65 años'),
+        ('66+', '66 años o más'),
+    ]
+    
+    NIVEL_EDUCATIVO_CHOICES = [
+        ('ninguno', 'Ninguno'),
+        ('primaria', 'Primaria'),
+        ('bachillerato', 'Bachillerato'),
+        ('tecnico', 'Técnico'),
+        ('tecnologo', 'Tecnólogo'),
+        ('profesional', 'Profesional'),
+        ('postgrado', 'Postgrado'),
+    ]
+    
+    GRUPO_ETNICO_CHOICES = [
+        ('ninguno', 'Ninguno'),
+        ('indigena', 'Indígena'),
+        ('rom', 'ROM (Gitano)'),
+        ('raizal', 'Raizal'),
+        ('palenquero', 'Palenquero'),
+        ('negro', 'Negro(a) / Afrocolombiano(a)'),
+    ]
+    
+    GRUPO_POBLACIONAL_CHOICES = [
+        ('ninguno', 'Ninguno'),
+        ('victima_conflicto', 'Víctima del conflicto armado'),
+        ('desplazado', 'Desplazado'),
+        ('reinsertado', 'Reinsertado'),
+        ('habitante_calle', 'Habitante de calle'),
+        ('lgbtiq', 'LGBTIQ+'),
+        ('migrante', 'Migrante'),
+        ('otro', 'Otro'),
+    ]
+    
+    ESTRATO_CHOICES = [
+        ('1', 'Estrato 1'),
+        ('2', 'Estrato 2'),
+        ('3', 'Estrato 3'),
+        ('4', 'Estrato 4'),
+        ('5', 'Estrato 5'),
+        ('6', 'Estrato 6'),
+    ]
+    
+    LOCALIDAD_CHOICES = [
+        ('usaquen', 'Usaquén'),
+        ('chapinero', 'Chapinero'),
+        ('santa_fe', 'Santa Fe'),
+        ('san_cristobal', 'San Cristóbal'),
+        ('usme', 'Usme'),
+        ('tunjuelito', 'Tunjuelito'),
+        ('bosa', 'Bosa'),
+        ('kennedy', 'Kennedy'),
+        ('fontibon', 'Fontibón'),
+        ('engativa', 'Engativá'),
+        ('suba', 'Suba'),
+        ('barrios_unidos', 'Barrios Unidos'),
+        ('teusaquillo', 'Teusaquillo'),
+        ('los_martires', 'Los Mártires'),
+        ('antonio_narino', 'Antonio Nariño'),
+        ('puente_aranda', 'Puente Aranda'),
+        ('candelaria', 'La Candelaria'),
+        ('rafael_uribe', 'Rafael Uribe Uribe'),
+        ('ciudad_bolivar', 'Ciudad Bolívar'),
+        ('sumapaz', 'Sumapaz'),
+        ('fuera_bogota', 'Fuera de Bogotá'),
+    ]
+    
+    CALIDAD_CHOICES = [
+        ('propio', 'Propio'),
+        ('familiar', 'Familiar'),
+        ('amigo', 'Amigo'),
+        ('representante_legal', 'Representante Legal'),
+        ('otro', 'Otro'),
+    ]
+    
+    # Campos de identificación (obligatorios)
+    tipo_documento = models.CharField(
+        max_length=5,
+        choices=TIPO_DOCUMENTO_CHOICES,
+        verbose_name='Tipo de Documento'
+    )
+    numero_documento = models.CharField(
+        max_length=20,
+        verbose_name='Número de Documento',
+        db_index=True
+    )
+    nombre = models.CharField(max_length=100, verbose_name='Nombre')
+    apellido = models.CharField(max_length=100, verbose_name='Apellido')
+    
+    # Contacto (obligatorio)
+    celular = models.CharField(max_length=15, verbose_name='Celular')
+    correo_electronico = models.EmailField(verbose_name='Correo Electrónico')
+    
+    # Datos demográficos (todos obligatorios)
+    sexo = models.CharField(
+        max_length=1,
+        choices=SEXO_CHOICES,
+        verbose_name='Sexo'
+    )
+    genero = models.CharField(
+        max_length=20,
+        choices=GENERO_CHOICES,
+        verbose_name='Género'
+    )
+    orientacion_sexual = models.CharField(
+        max_length=20,
+        choices=ORIENTACION_SEXUAL_CHOICES,
+        verbose_name='Orientación Sexual'
+    )
+    rango_edad = models.CharField(
+        max_length=10,
+        choices=RANGO_EDAD_CHOICES,
+        verbose_name='Rango de Edad'
+    )
+    nivel_educativo = models.CharField(
+        max_length=20,
+        choices=NIVEL_EDUCATIVO_CHOICES,
+        verbose_name='Nivel Educativo'
+    )
+    
+    # Caracterización (todos obligatorios)
+    grupo_etnico = models.CharField(
+        max_length=20,
+        choices=GRUPO_ETNICO_CHOICES,
+        verbose_name='Grupo Étnico'
+    )
+    grupo_poblacional = models.CharField(
+        max_length=30,
+        choices=GRUPO_POBLACIONAL_CHOICES,
+        verbose_name='Grupo Poblacional'
+    )
+    estrato_socioeconomico = models.CharField(
+        max_length=1,
+        choices=ESTRATO_CHOICES,
+        verbose_name='Estrato Socioeconómico'
+    )
+    localidad = models.CharField(
+        max_length=30,
+        choices=LOCALIDAD_CHOICES,
+        verbose_name='Localidad'
+    )
+    
+    # Información adicional (obligatorios)
+    calidad_comunicacion = models.CharField(
+        max_length=30,
+        choices=CALIDAD_CHOICES,
+        verbose_name='Te comunicas en calidad de'
+    )
+    tiene_discapacidad = models.BooleanField(
+        default=False,
+        verbose_name='¿Tienes alguna discapacidad?'
+    )
+    tipo_discapacidad = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name='Tipo de discapacidad (si aplica)'
+    )
+    
+    # Auditoría
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de Registro'
+    )
+    
+    class Meta:
+        verbose_name = 'Solicitante'
+        verbose_name_plural = 'Solicitantes'
+        ordering = ['-fecha_registro']
+        indexes = [
+            models.Index(fields=['tipo_documento', 'numero_documento']),
+            models.Index(fields=['numero_documento']),
+            models.Index(fields=['correo_electronico']),
+            models.Index(fields=['-fecha_registro']),
+        ]
+    
+    def __str__(self):
+        return f"{self.nombre} {self.apellido} - {self.tipo_documento} {self.numero_documento}"
+    
+    def get_nombre_completo(self):
+        """Retorna el nombre completo del solicitante"""
+        return f"{self.nombre} {self.apellido}"
+    
+    @classmethod
+    def get_ultimo_registro(cls, tipo_documento, numero_documento):
+        """
+        Obtiene el último registro de un solicitante por documento
+        Para pre-llenar el formulario con la última información
+        """
+        return cls.objects.filter(
+            tipo_documento=tipo_documento,
+            numero_documento=numero_documento
+        ).order_by('-fecha_registro').first()
+    
+    @classmethod
+    def get_historial_por_documento(cls, tipo_documento, numero_documento):
+        """
+        Obtiene todos los registros históricos de un solicitante
+        """
+        return cls.objects.filter(
+            tipo_documento=tipo_documento,
+            numero_documento=numero_documento
+        ).order_by('-fecha_registro')
+
+
 class Cita(models.Model):
     """
-    Modelo para gestionar las citas de los usuarios
+    Modelo para gestionar las citas
+    Ahora soporta tanto Usuario (legacy/asesores) como Solicitante (nuevo sistema)
     """
     ESTADO_CHOICES = [
         ('agendada', 'Agendada'),
@@ -16,12 +269,28 @@ class Cita(models.Model):
         ('no_asistio', 'No Asistió'),
     ]
     
+    # Sistema antiguo (opcional para transición)
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='citas',
-        verbose_name='Usuario'
+        verbose_name='Usuario',
+        null=True,
+        blank=True,
+        help_text='Usuario del sistema (solo para asesores/admin)'
     )
+    
+    # Sistema nuevo (principal)
+    solicitante = models.ForeignKey(
+        'Solicitante',
+        on_delete=models.CASCADE,
+        related_name='citas',
+        verbose_name='Solicitante',
+        null=True,
+        blank=True,
+        help_text='Persona que solicita la cita'
+    )
+    
     fecha = models.DateField(verbose_name='Fecha de la Cita')
     hora_inicio = models.TimeField(verbose_name='Hora de Inicio')
     hora_fin = models.TimeField(verbose_name='Hora de Fin')
@@ -52,14 +321,48 @@ class Cita(models.Model):
         ordering = ['fecha', 'hora_inicio']
         indexes = [
             models.Index(fields=['fecha', 'hora_inicio']),
-            models.Index(fields=['usuario', 'estado']),
+            models.Index(fields=['estado']),
         ]
     
     def __str__(self):
-        return f"Cita de {self.usuario.get_full_name()} - {self.fecha} {self.hora_inicio}"
+        if self.solicitante:
+            nombre = self.solicitante.get_nombre_completo()
+        elif self.usuario:
+            nombre = self.usuario.get_full_name()
+        else:
+            nombre = "Sin asignar"
+        return f"Cita de {nombre} - {self.fecha} {self.hora_inicio}"
+    
+    def get_nombre_solicitante(self):
+        """Retorna el nombre del solicitante (nuevo o viejo sistema)"""
+        if self.solicitante:
+            return self.solicitante.get_nombre_completo()
+        elif self.usuario:
+            return self.usuario.get_full_name()
+        return "Sin nombre"
+    
+    def get_email_solicitante(self):
+        """Retorna el email del solicitante"""
+        if self.solicitante:
+            return self.solicitante.correo_electronico
+        elif self.usuario:
+            return self.usuario.email
+        return None
+    
+    def get_telefono_solicitante(self):
+        """Retorna el teléfono del solicitante"""
+        if self.solicitante:
+            return self.solicitante.celular
+        elif self.usuario:
+            return self.usuario.telefono if hasattr(self.usuario, 'telefono') else None
+        return None
     
     def clean(self):
         """Validaciones personalizadas del modelo"""
+        # Validar que tenga al menos un solicitante o usuario
+        if not self.solicitante and not self.usuario:
+            raise ValidationError('La cita debe tener un solicitante o usuario asignado.')
+        
         # Validar que la fecha no sea en el pasado
         if self.fecha and self.fecha < timezone.now().date():
             raise ValidationError('No se puede agendar una cita en el pasado.')
@@ -119,6 +422,12 @@ class Cita(models.Model):
         diferencia = fecha_hora_cita - ahora
         
         return diferencia >= timedelta(hours=settings.ANTELACION_MINIMA_CANCELACION_HORAS)
+    
+    def get_documento_solicitante(self):
+        """Retorna el documento del solicitante"""
+        if self.solicitante:
+            return f"{self.solicitante.tipo_documento} {self.solicitante.numero_documento}"
+        return "N/A"
 
 
 class Interaccion(models.Model):
@@ -233,4 +542,3 @@ class DisponibilidadHoraria(models.Model):
     def __str__(self):
         estado = "Disponible" if self.disponible else "Bloqueado"
         return f"{self.fecha} {self.hora_inicio}-{self.hora_fin} - {estado}"
-
