@@ -1,41 +1,122 @@
 from django.contrib import admin
-from django.utils.html import format_html
-from .models import Cita, Interaccion, DisponibilidadHoraria
+from .models import Cita, Solicitante, Interaccion, DisponibilidadHoraria
+
+
+@admin.register(Solicitante)
+class SolicitanteAdmin(admin.ModelAdmin):
+    """
+    Configuración del admin para Solicitante
+    """
+    list_display = [
+        'numero_documento', 
+        'tipo_documento', 
+        'get_nombre_completo',
+        'celular',
+        'correo_electronico',
+        'fecha_registro'
+    ]
+    list_filter = [
+        'tipo_documento',
+        'sexo',
+        'rango_edad',
+        'localidad',
+        'fecha_registro'
+    ]
+    search_fields = [
+        'numero_documento',
+        'nombre',
+        'apellido',
+        'correo_electronico',
+        'celular'
+    ]
+    readonly_fields = ['fecha_registro']
+    
+    fieldsets = (
+        ('Identificación', {
+            'fields': ('tipo_documento', 'numero_documento', 'nombre', 'apellido')
+        }),
+        ('Contacto', {
+            'fields': ('celular', 'correo_electronico')
+        }),
+        ('Datos Demográficos', {
+            'fields': (
+                'sexo',
+                'genero', 
+                'orientacion_sexual',
+                'rango_edad',
+                'nivel_educativo'
+            )
+        }),
+        ('Caracterización', {
+            'fields': (
+                'grupo_etnico',
+                'grupo_poblacional',
+                'estrato_socioeconomico',
+                'localidad'
+            )
+        }),
+        ('Información Adicional', {
+            'fields': (
+                'calidad_comunicacion',
+                'tiene_discapacidad',
+                'tipo_discapacidad'
+            )
+        }),
+        ('Auditoría', {
+            'fields': ('fecha_registro',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_nombre_completo(self, obj):
+        return obj.get_nombre_completo()
+    get_nombre_completo.short_description = 'Nombre Completo'
 
 
 @admin.register(Cita)
 class CitaAdmin(admin.ModelAdmin):
-    """Configuración del admin para el modelo Cita"""
-    
+    """
+    Configuración del admin para Cita
+    """
     list_display = [
         'id',
-        'usuario_info',
+        'get_nombre_solicitante',
+        'get_documento',
         'fecha',
         'hora_inicio',
-        'hora_fin',
-        'estado_badge',
+        'estado',
         'fecha_creacion'
     ]
-    list_filter = ['estado', 'fecha', 'fecha_creacion']
-    search_fields = [
-        'usuario__username',
-        'usuario__email',
-        'usuario__first_name',
-        'usuario__last_name',
-        'motivo'
+    list_filter = [
+        'estado',
+        'fecha',
+        'fecha_creacion'
     ]
-    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
-    date_hierarchy = 'fecha'
+    search_fields = [
+        'solicitante__numero_documento',
+        'solicitante__nombre',
+        'solicitante__apellido',
+        'usuario__username'
+    ]
+    readonly_fields = [
+        'fecha_creacion',
+        'fecha_actualizacion'
+    ]
     
     fieldsets = (
-        ('Información del Usuario', {
-            'fields': ('usuario',)
+        ('Solicitante', {
+            'fields': ('solicitante', 'usuario'),
+            'description': 'Selecciona el solicitante (sistema nuevo) o usuario (sistema antiguo)'
         }),
-        ('Detalles de la Cita', {
-            'fields': ('fecha', 'hora_inicio', 'hora_fin', 'estado', 'motivo')
-        }),
-        ('Enlace de Reunión', {
-            'fields': ('url_teams',)
+        ('Información de la Cita', {
+            'fields': (
+                'fecha',
+                'hora_inicio',
+                'hora_fin',
+                'estado',
+                'motivo',
+                'url_teams'
+            )
         }),
         ('Auditoría', {
             'fields': ('fecha_creacion', 'fecha_actualizacion'),
@@ -43,95 +124,97 @@ class CitaAdmin(admin.ModelAdmin):
         }),
     )
     
-    def usuario_info(self, obj):
-        return f"{obj.usuario.get_full_name()} ({obj.usuario.email})"
-    usuario_info.short_description = 'Usuario'
+    def get_nombre_solicitante(self, obj):
+        return obj.get_nombre_solicitante()
+    get_nombre_solicitante.short_description = 'Solicitante'
     
-    def estado_badge(self, obj):
-        colors = {
-            'agendada': '#28a745',
-            'cancelada': '#dc3545',
-            'completada': '#007bff',
-            'no_asistio': '#ffc107',
-        }
-        color = colors.get(obj.estado, '#6c757d')
-        return format_html(
-            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
-            color,
-            obj.get_estado_display()
-        )
-    estado_badge.short_description = 'Estado'
+    def get_documento(self, obj):
+        return obj.get_documento_solicitante()
+    get_documento.short_description = 'Documento'
     
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('usuario')
+    # Personalizar el formulario para mostrar datos relevantes
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "solicitante":
+            # Mostrar solicitantes ordenados por fecha de registro
+            kwargs["queryset"] = Solicitante.objects.all().order_by('-fecha_registro')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Interaccion)
 class InteraccionAdmin(admin.ModelAdmin):
-    """Configuración del admin para el modelo Interacción"""
-    
+    """
+    Configuración del admin para Interaccion
+    """
     list_display = [
         'id_interaccion',
-        'cita_info',
+        'cita',
         'asesor',
         'resultado',
         'fecha_registro'
     ]
-    list_filter = ['resultado', 'fecha_registro']
+    list_filter = [
+        'resultado',
+        'fecha_registro'
+    ]
     search_fields = [
         'id_interaccion',
-        'cita__usuario__username',
-        'cita__usuario__email',
+        'cita__solicitante__numero_documento',
         'asesor__username',
         'observaciones'
     ]
-    readonly_fields = ['id_interaccion', 'fecha_registro']
+    readonly_fields = [
+        'id_interaccion',
+        'fecha_registro'
+    ]
     
     fieldsets = (
-        ('Información de la Cita', {
-            'fields': ('cita', 'asesor')
-        }),
-        ('Resultado de la Interacción', {
-            'fields': ('id_interaccion', 'resultado', 'observaciones')
+        ('Información de la Interacción', {
+            'fields': (
+                'cita',
+                'asesor',
+                'resultado',
+                'observaciones'
+            )
         }),
         ('Auditoría', {
-            'fields': ('fecha_registro',)
+            'fields': ('id_interaccion', 'fecha_registro'),
+            'classes': ('collapse',)
         }),
     )
-    
-    def cita_info(self, obj):
-        return f"{obj.cita.usuario.get_full_name()} - {obj.cita.fecha} {obj.cita.hora_inicio}"
-    cita_info.short_description = 'Cita'
-    
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('cita__usuario', 'asesor')
 
 
 @admin.register(DisponibilidadHoraria)
 class DisponibilidadHorariaAdmin(admin.ModelAdmin):
-    """Configuración del admin para el modelo DisponibilidadHoraria"""
-    
+    """
+    Configuración del admin para DisponibilidadHoraria
+    """
     list_display = [
         'fecha',
         'hora_inicio',
         'hora_fin',
-        'disponible_badge',
+        'disponible',
         'motivo'
     ]
-    list_filter = ['disponible', 'fecha']
-    search_fields = ['motivo']
-    date_hierarchy = 'fecha'
+    list_filter = [
+        'disponible',
+        'fecha'
+    ]
+    search_fields = [
+        'motivo'
+    ]
     
-    def disponible_badge(self, obj):
-        if obj.disponible:
-            return format_html(
-                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Disponible</span>'
+    fieldsets = (
+        ('Horario', {
+            'fields': (
+                'fecha',
+                'hora_inicio',
+                'hora_fin'
             )
-        else:
-            return format_html(
-                '<span style="background-color: #dc3545; color: white; padding: 3px 10px; border-radius: 3px;">Bloqueado</span>'
+        }),
+        ('Disponibilidad', {
+            'fields': (
+                'disponible',
+                'motivo'
             )
-    disponible_badge.short_description = 'Estado'
-
+        }),
+    )
