@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Agendamiento - ATENEA</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f5f5;
+        }
+        
+        .header-bar {
+            background: linear-gradient(90deg, #0d47a1 0%, #1976d2 100%);
+            padding: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #ff6f00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        
+        .logo i {
+            font-size: 3rem;
+            color: white;
+        }
+        
+        .main-title {
+            color: #0d47a1;
+            font-weight: bold;
+            font-size: 2.5rem;
+            margin: 30px 0 20px 0;
+            text-align: center;
+        }
+        
+        .info-section {
+            background: #fff3e0;
+            border-left: 5px solid #ff6f00;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-section h5 {
+            color: #0d47a1;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .info-section p {
+            margin-bottom: 5px;
+            color: #424242;
+        }
+        
+        .warning-text {
+            background: #fffde7;
+            border: 2px solid #fbc02d;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .options-container {
+            margin: 40px 0;
+        }
+        
+        .option-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .option-card:hover {
+            border-color: #0d47a1;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(13,71,161,0.2);
+        }
+        
+        .option-icon {
+            font-size: 4rem;
+            color: #0d47a1;
+            margin-bottom: 20px;
+        }
+        
+        .option-title {
+            color: #0d47a1;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            min-height: 50px;
+        }
+        
+        .btn-option {
+            background-color: #0d47a1;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-option:hover {
+            background-color: #1565c0;
+            transform: scale(1.05);
+            color: white;
+        }
+        
+        .btn-back {
+            background-color: #424242;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 30px auto;
+            display: block;
+        }
+        
+        .btn-back:hover {
+            background-color: #616161;
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .footer {
+            background: #f5f5f5;
+            padding: 20px 0;
+            text-align: center;
+            color: #757575;
+            margin-top: 50px;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <div class="container">
+            <div class="logo-container">
+                <div class="logo">
+                    <i class="bi bi-headset"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Título Principal -->
+            <h1 class="main-title">
+                Elige la opción que necesites para acceder a nuestros servicios
+            </h1>
+
+            <!-- Mensaje sobre discapacidad auditiva -->
+            <div class="info-section">
+                <h5>
+                    <i class="bi bi-info-circle-fill"></i>
+                    Recuerda que este canal es de uso exclusivo para personas con discapacidad auditiva.
+                </h5>
+                <p><strong>Horario de atención:</strong></p>
+                <p>Lunes a Viernes de 07:00 a.m. a 5:00 p.m.</p>
+            </div>
+
+            <!-- Advertencia -->
+            <div class="warning-text">
+                <strong>Sino eres parte de la población con discapacidad auditiva, solicitamos abstenerte de hacer uso de este canal, ¡Te invitamos a hacer uso de nuestros otros canales!</strong>
+            </div>
+
+            <!-- Opciones -->
+            <div class="options-container">
+                <div class="row g-4">
+                    <!-- Opción 1: Agendar -->
+                    <div class="col-md-4">
+                        <div class="option-card">
+                            <div>
+                                <div class="option-icon">
+                                    <i class="bi bi-camera-video-fill"></i>
+                                </div>
+                                <div class="option-title">
+                                    Aquí podrás agendar tu próxima videollamada.
+                                </div>
+                            </div>
+                            <a href="{% url 'citas:agendar_cita' %}" class="btn btn-option">
+                                Inicia aquí
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Opción 2: Consultar -->
+                    <div class="col-md-4">
+                        <div class="option-card">
+                            <div>
+                                <div class="option-icon">
+                                    <i class="bi bi-calendar-check-fill"></i>
+                                </div>
+                                <div class="option-title">
+                                    Aquí podrás consultar la fecha en la que tendrás tu próxima cita.
+                                </div>
+                            </div>
+                            <a href="{% url 'citas:consultar_cita' %}" class="btn btn-option">
+                                Inicia aquí
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Opción 3: Cancelar -->
+                    <div class="col-md-4">
+                        <div class="option-card">
+                            <div>
+                                <div class="option-icon">
+                                    <i class="bi bi-calendar-x-fill"></i>
+                                </div>
+                                <div class="option-title">
+                                    Aquí podrás cancelar tu cita en caso de que no puedas asistir.
+                                </div>
+                            </div>
+                            <a href="{% url 'citas:cancelar_cita_buscar' %}" class="btn btn-option">
+                                Inicia aquí
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Volver (por ahora va a la misma página) -->
+            <button onclick="window.location.href='/'" class="btn btn-back">
+                Volver al menú principal
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Sistema de Agendamiento ATENEA. Todos los derechos reservados.</p>
+            <p class="mt-2">
+                <a href="/usuarios/login/" style="color: #9e9e9e; text-decoration: none; font-size: 0.85rem;">
+                    <i class="bi bi-person-badge"></i>Acceso Asesores
+
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

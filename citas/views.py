@@ -147,3 +147,78 @@ def atender_cita_view(request, cita_id):
     }
     return render(request, 'citas/atender_cita.html', context)
 
+
+
+# ========================================
+# VISTAS PÚBLICAS (Sin autenticación)
+# ========================================
+
+def agendar_cita_publica_view(request):
+    """Vista pública para agendar citas (TODO: Implementar)"""
+    from django.http import HttpResponse
+    return HttpResponse("<h1>Vista de Agendamiento - En construcción</h1><p><a href='/'>Volver</a></p>")
+
+
+def consultar_cita_view(request):
+    """
+    Vista pública para consultar citas por documento
+    Valida datos del solicitante y muestra la próxima cita agendada
+    """
+    from django.utils import timezone
+    from .forms import ConsultarCitaForm
+    from .models import Solicitante, Cita
+    
+    if request.method == 'POST':
+        form = ConsultarCitaForm(request.POST)
+        if form.is_valid():
+            tipo_doc = form.cleaned_data['tipo_documento']
+            numero_doc = form.cleaned_data['numero_documento']
+            celular = form.cleaned_data['celular']
+            email = form.cleaned_data['correo_electronico']
+            
+            # Buscar el último registro del solicitante
+            solicitante = Solicitante.get_ultimo_registro(tipo_doc, numero_doc)
+            
+            if not solicitante:
+                messages.error(request, 'No se encontró ningún registro con el documento proporcionado.')
+                return render(request, 'citas/consultar_cita.html', {'form': form})
+            
+            # Validar que los datos coincidan
+            if solicitante.celular != celular or solicitante.correo_electronico != email:
+                messages.error(request, 'Los datos proporcionados no coinciden con nuestros registros.')
+                return render(request, 'citas/consultar_cita.html', {'form': form})
+            
+            # Buscar la próxima cita agendada
+            proxima_cita = Cita.objects.filter(
+                solicitante__tipo_documento=tipo_doc,
+                solicitante__numero_documento=numero_doc,
+                estado='agendada',
+                fecha__gte=timezone.now().date()
+            ).select_related('solicitante').order_by('fecha', 'hora_inicio').first()
+            
+            return render(request, 'citas/consultar_cita_resultado.html', {
+                'form': form,
+                'cita': proxima_cita,
+            })
+    else:
+        form = ConsultarCitaForm()
+    
+    return render(request, 'citas/consultar_cita.html', {'form': form})
+
+
+def buscar_cita_cancelar_view(request):
+    """Vista pública para buscar cita a cancelar por documento (TODO: Implementar)"""
+    from django.http import HttpResponse
+    return HttpResponse("<h1>Vista de Cancelación - En construcción</h1><p><a href='/'>Volver</a></p>")
+
+
+def confirmar_cancelar_cita_view(request, cita_id):
+    """Vista pública para confirmar cancelación de cita (TODO: Implementar)"""
+    from django.http import HttpResponse
+    return HttpResponse("<h1>Confirmar Cancelación - En construcción</h1><p><a href='/'>Volver</a></p>")
+
+
+def horarios_disponibles_view(request):
+    """Vista para ver horarios disponibles (TODO: Implementar)"""
+    from django.http import HttpResponse
+    return HttpResponse("<h1>Horarios Disponibles - En construcción</h1><p><a href='/'>Volver</a></p>")

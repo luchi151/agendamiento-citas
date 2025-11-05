@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 from datetime import datetime, timedelta, time
 from .models import Cita, Interaccion
+from .models import Solicitante
 
 
 class CitaForm(forms.ModelForm):
@@ -155,3 +156,66 @@ class InteraccionForm(forms.ModelForm):
             raise forms.ValidationError('Las observaciones no pueden exceder 200 caracteres.')
         
         return observaciones
+    
+
+class ConsultarCitaForm(forms.Form):
+    """
+    Formulario para consultar citas por documento
+    Valida que el documento y datos coincidan
+    """
+    
+    tipo_documento = forms.ChoiceField(
+        choices=Solicitante.TIPO_DOCUMENTO_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+        }),
+        label='Tipo de documento',
+        required=True
+    )
+    
+    numero_documento = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Escribe tu número de documento'
+        }),
+        label='Número de documento',
+        required=True
+    )
+    
+    celular = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingresa un número celular de 10 dígitos'
+        }),
+        label='Celular',
+        required=True
+    )
+    
+    correo_electronico = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Escribe un correo electrónico'
+        }),
+        label='Correo electrónico',
+        required=True
+    )
+    
+    def clean_numero_documento(self):
+        """Validar formato del número de documento"""
+        numero = self.cleaned_data.get('numero_documento')
+        if not numero.isdigit():
+            raise forms.ValidationError('El número de documento solo debe contener números.')
+        return numero
+    
+    def clean_celular(self):
+        """Validar formato del celular"""
+        celular = self.cleaned_data.get('celular')
+        # Remover espacios y caracteres especiales
+        celular = ''.join(filter(str.isdigit, celular))
+        
+        if len(celular) != 10:
+            raise forms.ValidationError('El celular debe tener 10 dígitos.')
+        
+        return celular    
