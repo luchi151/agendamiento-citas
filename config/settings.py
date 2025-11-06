@@ -178,20 +178,44 @@ ANTELACION_MINIMA_CANCELACION_HORAS = 2
 # ==================================================
 
 # Para desarrollo: Mostrar emails en consola
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
-    # Para producción: Usar SMTP real
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
-    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+# if DEBUG:
+#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# else:
+#     # Para producción: Usar SMTP real
+#     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#     EMAIL_HOST = 'smtp.gmail.com'
+#     EMAIL_PORT = 587
+#     EMAIL_USE_TLS = True
+#     EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+#     EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+
+# # Remitente por defecto
+# DEFAULT_FROM_EMAIL = 'ATENEA Sistema de Citas <noreply@atenea.com>'
+# ADMIN_EMAIL = 'admin@atenea.com'
+
+# # URL del sitio (para links en emails)
+# SITE_URL = 'http://localhost:8000'  # Cambiar en producción
+
+# ==================================================
+# CONFIGURACIÓN DE EMAIL - MICROSOFT/OUTLOOK
+# ==================================================
+
+# Backend de email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Configuración de Microsoft/Outlook
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='agendamientovideollamada@agenciaatenea.gov.co')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 # Remitente por defecto
-DEFAULT_FROM_EMAIL = 'ATENEA Sistema de Citas <noreply@atenea.com>'
-ADMIN_EMAIL = 'admin@atenea.com'
+DEFAULT_FROM_EMAIL = f'ATENEA Sistema de Citas <{EMAIL_HOST_USER}>'
+ADMIN_EMAIL = EMAIL_HOST_USER
 
-# URL del sitio (para links en emails)
-SITE_URL = 'http://localhost:8000'  # Cambiar en producción
+# URL del sitio
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
+
+# Timeout para conexión de email
+EMAIL_TIMEOUT = 10
