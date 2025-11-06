@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from .models import Cita, Interaccion
 from .forms import CitaForm, InteraccionForm
+from .email_utils import enviar_email_confirmacion_cita, enviar_email_cancelacion_cita
 
 
 @login_required
@@ -280,6 +281,7 @@ def agendar_paso2_fecha_view(request):
     from .forms import SeleccionFechaHoraForm
     from .models import Solicitante, Cita
     from datetime import timedelta
+    from .email_utils import enviar_email_confirmacion_cita
     
     # Verificar que existan datos del solicitante en sesión
     solicitante_data = request.session.get('solicitante_data')
@@ -331,6 +333,22 @@ def agendar_paso2_fecha_view(request):
                 estado='agendada',
                 motivo=form.cleaned_data.get('motivo', ''),
             )
+
+            # ========================================
+            # ENVIAR EMAIL DE CONFIRMACIÓN
+            # ========================================
+            email_enviado = enviar_email_confirmacion_cita(cita)
+            if email_enviado:
+                messages.success(
+                    request, 
+                    '¡Cita agendada exitosamente! Te hemos enviado un email de confirmación.'
+                )
+            else:
+                messages.success(
+                    request, 
+                    '¡Cita agendada exitosamente! (No pudimos enviar el email de confirmación)'
+                )
+            # ========================================
             
             # Guardar ID de cita en sesión para confirmación
             request.session['cita_id'] = cita.id
@@ -448,6 +466,7 @@ def confirmar_cancelar_cita_view(request, cita_id):
     Valida que la cita pueda cancelarse (2 horas de antelación)
     """
     from .models import Cita
+    from .email_utils import enviar_email_cancelacion_cita
     
     cita = get_object_or_404(Cita, id=cita_id)
     
@@ -463,11 +482,22 @@ def confirmar_cancelar_cita_view(request, cita_id):
         # Cambiar estado a cancelada
         cita.estado = 'cancelada'
         cita.save()
+        # ========================================
+        # ENVIAR EMAIL DE CANCELACIÓN
+        # ========================================
+        email_enviado = enviar_email_cancelacion_cita(cita)
+        if email_enviado:
+            messages.success(
+                request, 
+                f'Cita cancelada exitosamente. Te hemos enviado un email de confirmación. Fecha: {cita.fecha.strftime("%d/%m/%Y")} - Hora: {cita.hora_inicio.strftime("%H:%M")}'
+            )
+        else:
+            messages.success(
+                request, 
+                f'Cita cancelada exitosamente. Fecha: {cita.fecha.strftime("%d/%m/%Y")} - Hora: {cita.hora_inicio.strftime("%H:%M")}'
+            )
+        # ========================================
         
-        messages.success(
-            request, 
-            f'Cita cancelada exitosamente. Fecha: {cita.fecha.strftime("%d/%m/%Y")} - Hora: {cita.hora_inicio.strftime("%H:%M")}'
-        )
         return redirect('home')
     
     # Si no es POST, redirigir al home

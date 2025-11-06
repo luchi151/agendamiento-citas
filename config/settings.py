@@ -173,3 +173,25 @@ DURACION_CITA_MINUTOS = 20
 ANTELACION_MINIMA_AGENDAMIENTO_HORAS = 1
 ANTELACION_MINIMA_CANCELACION_HORAS = 2
 
+# ==================================================
+# CONFIGURACIÓN DE EMAIL
+# ==================================================
+
+# Para desarrollo: Mostrar emails en consola
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # Para producción: Usar SMTP real
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+
+# Remitente por defecto
+DEFAULT_FROM_EMAIL = 'ATENEA Sistema de Citas <noreply@atenea.com>'
+ADMIN_EMAIL = 'admin@atenea.com'
+
+# URL del sitio (para links en emails)
+SITE_URL = 'http://localhost:8000'  # Cambiar en producción

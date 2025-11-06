@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Cita - ATENEA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(90deg, #0d47a1 0%, #1976d2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            margin: -30px -30px 30px -30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #ff6f00;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        .success-icon {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .success-icon div {
+            width: 80px;
+            height: 80px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+        h2 {
+            color: #0d47a1;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .details {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 150px;
+            color: #666;
+        }
+        .detail-value {
+            color: #212121;
+            flex: 1;
+        }
+        .important {
+            background: #fff3e0;
+            border-left: 4px solid #ff6f00;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .important h3 {
+            color: #e65100;
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .important ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .important li {
+            margin-bottom: 8px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #757575;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #0d47a1;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎧</div>
+            <h1>Sistema de Agendamiento ATENEA</h1>
+        </div>
+        
+        <div class="success-icon">
+            <div>✓</div>
+        </div>
+        
+        <h2>¡Cita Confirmada!</h2>
+        
+        <p>Hola <strong>{{ cita.solicitante.nombre }} {{ cita.solicitante.apellido }}</strong>,</p>
+        
+        <p>Tu cita ha sido agendada exitosamente. A continuación encontrarás los detalles:</p>
+        
+        <div class="details">
+            <div class="detail-row">
+                <span class="detail-label">📅 Fecha:</span>
+                <span class="detail-value">{{ cita.fecha|date:"l, d \d\e F \d\e Y" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">🕐 Hora:</span>
+                <span class="detail-value">{{ cita.hora_inicio|time:"h:i A" }} - {{ cita.hora_fin|time:"h:i A" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">📋 Documento:</span>
+                <span class="detail-value">{{ cita.get_documento_solicitante }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">📧 Email:</span>
+                <span class="detail-value">{{ cita.solicitante.correo_electronico }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">📱 Celular:</span>
+                <span class="detail-value">{{ cita.solicitante.celular }}</span>
+            </div>
+            {% if cita.url_teams %}
+            <div class="detail-row">
+                <span class="detail-label">🎥 Videollamada:</span>
+                <span class="detail-value"><a href="{{ cita.url_teams }}">Unirse a la reunión</a></span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="info-box">
+            <strong>📌 Guarda este correo</strong> para tener a mano los detalles de tu cita.
+        </div>
+        
+        <div class="important">
+            <h3>⚠️ Información Importante:</h3>
+            <ul>
+                <li>Por favor, conéctate a tiempo para tu cita</li>
+                <li>Ten a la mano tu documento de identidad</li>
+                <li>{% if cita.url_teams %}El enlace de la videollamada está arriba{% else %}Recibirás el enlace de la videollamada antes de tu cita{% endif %}</li>
+                <li>Si necesitas cancelar, hazlo con al menos 2 horas de anticipación</li>
+                <li>Puedes cancelar tu cita desde nuestro sitio web</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Sistema de Agendamiento ATENEA</strong></p>
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+            <p>© 2024 ATENEA. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>
