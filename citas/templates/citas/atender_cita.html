@@ -27,17 +27,51 @@
         </div>
 
         <div class="row">
-            <!-- Información del Usuario -->
+            <!-- Información del Solicitante -->
             <div class="col-md-4 mb-4">
                 <div class="card user-info-card text-white shadow">
                     <div class="card-body">
                         <div class="text-center mb-3">
                             <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
                         </div>
-                        <h4 class="text-center mb-3">{{ cita.usuario.get_full_name }}</h4>
+                        <h4 class="text-center mb-3">{{ cita.get_nombre_solicitante }}</h4>
                         
                         <hr style="border-color: rgba(255,255,255,0.3);">
                         
+                        {% if cita.solicitante %}
+                        <!-- Datos del nuevo sistema (Solicitante) -->
+                        <p class="mb-2">
+                            <i class="bi bi-card-text"></i>
+                            <strong>Documento:</strong><br>
+                            <span class="ms-3">{{ cita.get_documento_solicitante }}</span>
+                        </p>
+                        
+                        <p class="mb-2">
+                            <i class="bi bi-envelope"></i>
+                            <strong>Email:</strong><br>
+                            <span class="ms-3">{{ cita.solicitante.correo_electronico }}</span>
+                        </p>
+                        
+                        <p class="mb-2">
+                            <i class="bi bi-telephone"></i>
+                            <strong>Celular:</strong><br>
+                            <span class="ms-3">{{ cita.solicitante.celular }}</span>
+                        </p>
+                        
+                        <p class="mb-2">
+                            <i class="bi bi-geo-alt"></i>
+                            <strong>Localidad:</strong><br>
+                            <span class="ms-3">{{ cita.solicitante.get_localidad_display }}</span>
+                        </p>
+                        
+                        <p class="mb-0">
+                            <i class="bi bi-person-badge"></i>
+                            <strong>Comunicación:</strong><br>
+                            <span class="ms-3">{{ cita.solicitante.get_calidad_comunicacion_display }}</span>
+                        </p>
+                        
+                        {% elif cita.usuario %}
+                        <!-- Datos del sistema antiguo (Usuario) -->
                         <p class="mb-2">
                             <i class="bi bi-person-badge"></i>
                             <strong>Usuario:</strong><br>
@@ -63,32 +97,41 @@
                             <strong>Tipo:</strong><br>
                             <span class="ms-3">{{ cita.usuario.get_tipo_usuario_display }}</span>
                         </p>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- Historial de citas del usuario -->
+                <!-- Historial de citas del solicitante -->
                 <div class="card mt-3 shadow-sm">
                     <div class="card-header bg-info text-white">
                         <h6 class="mb-0"><i class="bi bi-clock-history"></i> Historial</h6>
                     </div>
                     <div class="card-body">
-                        {% with citas_usuario=cita.usuario.citas.all %}
-                            <p class="mb-1">
-                                <strong>Total de citas:</strong> {{ citas_usuario.count }}
-                            </p>
-                            <p class="mb-1">
-                                <strong>Completadas:</strong> 
-                                <span class="badge bg-success">
-                                    {{ citas_usuario|filter_by_estado:'completada'|length }}
-                                </span>
-                            </p>
-                            <p class="mb-0">
-                                <strong>No asistió:</strong>
-                                <span class="badge bg-warning text-dark">
-                                    {{ citas_usuario|filter_by_estado:'no_asistio'|length }}
-                                </span>
-                            </p>
-                        {% endwith %}
+                        {% if cita.solicitante %}
+                            {% with citas_anteriores=cita.solicitante.citas.all %}
+                                <p class="mb-1">
+                                    <strong>Total de citas:</strong> {{ citas_anteriores.count }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Completadas:</strong> 
+                                    <span class="badge bg-success">
+                                        {{ citas_anteriores|length }}
+                                    </span>
+                                </p>
+                            {% endwith %}
+                        {% elif cita.usuario %}
+                            {% with citas_usuario=cita.usuario.citas.all %}
+                                <p class="mb-1">
+                                    <strong>Total de citas:</strong> {{ citas_usuario.count }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Completadas:</strong> 
+                                    <span class="badge bg-success">
+                                        {{ citas_usuario|length }}
+                                    </span>
+                                </p>
+                            {% endwith %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -104,7 +147,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <h5><i class="bi bi-calendar3"></i> Fecha</h5>
-                                <p class="fs-5 mb-3">{{ cita.fecha|date:"l, d de F de Y" }}</p>
+                                <p class="fs-5 mb-3">{{ cita.fecha|date:"l, d \d\e F \d\e Y" }}</p>
                             </div>
                             <div class="col-md-6">
                                 <h5><i class="bi bi-clock"></i> Horario</h5>

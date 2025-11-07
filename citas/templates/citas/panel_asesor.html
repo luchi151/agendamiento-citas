@@ -78,11 +78,19 @@
                                         <div>
                                             <h5 class="card-title mb-1">
                                                 <i class="bi bi-person-circle"></i>
-                                                {{ cita.usuario.get_full_name }}
+                                                {{ cita.get_nombre_solicitante }}
                                             </h5>
                                             <p class="text-muted mb-2">
-                                                <i class="bi bi-envelope"></i> {{ cita.usuario.email }}
+                                                <i class="bi bi-card-text"></i> {{ cita.get_documento_solicitante }}
                                             </p>
+                                            <p class="text-muted mb-2">
+                                                <i class="bi bi-envelope"></i> {{ cita.get_email_solicitante }}
+                                            </p>
+                                            {% if cita.get_telefono_solicitante %}
+                                            <p class="text-muted mb-0">
+                                                <i class="bi bi-telephone"></i> {{ cita.get_telefono_solicitante }}
+                                            </p>
+                                            {% endif %}
                                         </div>
                                         <span class="badge bg-success">
                                             <i class="bi bi-clock"></i> {{ cita.hora_inicio|time:"H:i" }}
@@ -90,7 +98,7 @@
                                     </div>
                                     
                                     {% if cita.motivo %}
-                                    <div class="alert alert-info py-2 px-3 mb-2">
+                                    <div class="alert alert-info py-2 px-3 mb-2 mt-2">
                                         <small><strong>Motivo:</strong> {{ cita.motivo }}</small>
                                     </div>
                                     {% endif %}
@@ -140,7 +148,7 @@
                                 <tr>
                                     <th>Fecha</th>
                                     <th>Hora</th>
-                                    <th>Usuario</th>
+                                    <th>Solicitante</th>
                                     <th>Contacto</th>
                                     <th>Motivo</th>
                                     <th>Acciones</th>
@@ -160,14 +168,14 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <strong>{{ cita.usuario.get_full_name }}</strong><br>
-                                        <small class="text-muted">{{ cita.usuario.username }}</small>
+                                        <strong>{{ cita.get_nombre_solicitante }}</strong><br>
+                                        <small class="text-muted">{{ cita.get_documento_solicitante }}</small>
                                     </td>
                                     <td>
                                         <small>
-                                            <i class="bi bi-envelope"></i> {{ cita.usuario.email }}<br>
-                                            {% if cita.usuario.telefono %}
-                                                <i class="bi bi-telephone"></i> {{ cita.usuario.telefono }}
+                                            <i class="bi bi-envelope"></i> {{ cita.get_email_solicitante }}<br>
+                                            {% if cita.get_telefono_solicitante %}
+                                                <i class="bi bi-telephone"></i> {{ cita.get_telefono_solicitante }}
                                             {% endif %}
                                         </small>
                                     </td>
@@ -197,27 +205,15 @@
             </div>
         </div>
 
-        <!-- Accesos Rápidos -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <i class="bi bi-calendar3" style="font-size: 2rem; color: #0d6efd;"></i>
-                        <h5 class="mt-2">Ver Todas las Citas</h5>
-                        <p class="text-muted">Accede al panel de administración</p>
-                        <a href="/admin/citas/cita/" class="btn btn-outline-primary">
-                            <i class="bi bi-box-arrow-up-right"></i> Ir al Admin
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <!-- Acceso Rápido -->
+        <div class="row mt-4 justify-content-center">
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body text-center">
                         <i class="bi bi-clipboard-data" style="font-size: 2rem; color: #198754;"></i>
                         <h5 class="mt-2">Mis Interacciones</h5>
                         <p class="text-muted">Revisa tu historial de atenciones</p>
-                        <a href="/admin/citas/interaccion/" class="btn btn-outline-success">
+                        <a href="{% url 'citas:mis_interacciones' %}" class="btn btn-outline-success">
                             <i class="bi bi-list-ul"></i> Ver Historial
                         </a>
                     </div>

@@ -508,3 +508,33 @@ def horarios_disponibles_view(request):
     """Vista para ver horarios disponibles (TODO: Implementar)"""
     from django.http import HttpResponse
     return HttpResponse("<h1>Horarios Disponibles - En construcción</h1><p><a href='/'>Volver</a></p>")
+
+
+@login_required
+def mis_interacciones_view(request):
+    """Vista para que el asesor vea su historial de interacciones"""
+    if not request.user.es_asesor():
+        messages.error(request, 'No tienes permisos para acceder a esta sección.')
+        return redirect('home')
+    
+    # Obtener interacciones del asesor
+    interacciones = Interaccion.objects.filter(
+        asesor=request.user
+    ).select_related(
+        'cita', 
+        'cita__solicitante',
+        'cita__usuario'
+    ).order_by('-fecha_registro')
+    
+    # Estadísticas
+    total_interacciones = interacciones.count()
+    efectivas = interacciones.filter(resultado='efectiva').count()
+    no_asiste = interacciones.filter(resultado='no_asiste').count()
+    
+    context = {
+        'interacciones': interacciones,
+        'total_interacciones': total_interacciones,
+        'efectivas': efectivas,
+        'no_asiste': no_asiste,
+    }
+    return render(request, 'citas/mis_interacciones.html', context)
