@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from decouple import config
 
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     
     # Local apps
     'usuarios',
-    'citas',
+    'citas.apps.CitasConfig',
 ]
 
 MIDDLEWARE = [
@@ -221,3 +221,66 @@ SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
 # Timeout para conexión de email
 EMAIL_TIMEOUT = 10
+
+# ============================================
+# MICROSOFT TEAMS / GRAPH API
+# ============================================
+
+# Credenciales de Azure AD (OBLIGATORIAS)
+MICROSOFT_TENANT_ID = config('MICROSOFT_TENANT_ID')
+MICROSOFT_CLIENT_ID = config('MICROSOFT_CLIENT_ID')
+MICROSOFT_CLIENT_SECRET = config('MICROSOFT_CLIENT_SECRET')
+
+# Usuario de Teams que creará las reuniones (Object ID)
+MICROSOFT_TEAMS_USER_ID = config('MICROSOFT_TEAMS_USER_ID')
+
+# Graph API Configuration
+MICROSOFT_GRAPH_API_ENDPOINT = 'https://graph.microsoft.com/v1.0'
+MICROSOFT_GRAPH_AUTHORITY = f'https://login.microsoftonline.com/{MICROSOFT_TENANT_ID}'
+MICROSOFT_GRAPH_SCOPES = ['https://graph.microsoft.com/.default']
+
+# Configuración de reuniones
+MICROSOFT_GRAPH_TIMEOUT = 30  # segundos
+TEAMS_DEFAULT_MEETING_DURATION = 30  # minutos
+TEAMS_TIMEZONE = 'America/Bogota'  # Ajustar según tu zona horaria
+
+# Reintentos en caso de fallo
+TEAMS_MAX_RETRIES = 3
+TEAMS_RETRY_DELAY = 2  # segundos
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'teams_integration.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'citas.services': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'citas.signals': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+DISABLE_SSL_VERIFY = True

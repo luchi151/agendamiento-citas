@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reunión de Teams Lista</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #5b47d6 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #5b47d6;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        .info-card {
+            background: #f8f9fa;
+            border-left: 4px solid #5b47d6;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        .info-card h3 {
+            margin-top: 0;
+            color: #5b47d6;
+            font-size: 18px;
+        }
+        .info-item {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 140px;
+        }
+        .info-value {
+            color: #333;
+            flex: 1;
+        }
+        .teams-button {
+            display: block;
+            background: linear-gradient(135deg, #5b47d6 0%, #764ba2 100%);
+            color: white !important;
+            text-align: center;
+            padding: 18px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 40px 0;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(91, 71, 214, 0.3);
+            transition: transform 0.2s;
+        }
+        .teams-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 71, 214, 0.4);
+        }
+        .instructions {
+            background: #e3f2fd;
+            border: 2px solid #90caf9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        .instructions h4 {
+            margin-top: 0;
+            color: #1976d2;
+            font-size: 16px;
+        }
+        .instructions ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .url-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+        .url-box strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .url-box small {
+            color: #666;
+            font-size: 13px;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 25px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 3px solid #5b47d6;
+        }
+        .footer p {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">🎉</div>
+            <h1>¡Tu Reunión de Teams está Lista!</h1>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <p class="greeting">¡Hola {{ nombre_solicitante }}!</p>
+            
+            <p class="message">
+                Tu cita ha sido confirmada y <strong>hemos creado automáticamente una reunión de Microsoft Teams</strong> 
+                para ti. Todo está listo para tu atención virtual.
+            </p>
+            
+            <!-- Info Card -->
+            <div class="info-card">
+                <h3>📅 Detalles de tu Cita</h3>
+                <div class="info-item">
+                    <span class="info-label">📆 Fecha:</span>
+                    <span class="info-value">{{ fecha }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">🕐 Hora:</span>
+                    <span class="info-value">{{ hora }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">⏱️ Duración:</span>
+                    <span class="info-value">{{ duracion }} minutos</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">📋 Tipo:</span>
+                    <span class="info-value">{{ tipo_atencion }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">💬 Motivo:</span>
+                    <span class="info-value">{{ motivo }}</span>
+                </div>
+            </div>
+            
+            <!-- Teams Button -->
+            <a href="{{ url_teams }}" class="teams-button" target="_blank">
+                🎥 Unirse a la Reunión de Teams
+            </a>
+            
+            <!-- Instructions -->
+            <div class="instructions">
+                <h4>📋 Instrucciones para Conectarte:</h4>
+                <ul>
+                    <li><strong>🕐 5 minutos antes:</strong> Haz clic en el botón de arriba</li>
+                    <li><strong>💻 Navegador recomendado:</strong> Google Chrome, Microsoft Edge o Firefox</li>
+                    <li><strong>📱 No necesitas instalar Teams:</strong> Funciona directo desde el navegador</li>
+                    <li><strong>🎤 Verifica:</strong> Que tu micrófono y cámara funcionen correctamente</li>
+                    <li><strong>🌐 Conexión:</strong> Asegúrate de tener una buena conexión a internet</li>
+                </ul>
+            </div>
+            
+            <!-- URL Box -->
+            <div class="url-box">
+                <strong>⚠️ Guarda este enlace por si lo necesitas:</strong>
+                <small>{{ url_teams }}</small>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 15px;">
+                Si tienes alguna duda, problema técnico o necesitas reprogramar, 
+                no dudes en contactarnos.
+            </p>
+            
+            <p style="margin-top: 20px;">
+                <strong>¡Nos vemos pronto! 😊</strong><br>
+                <em>Equipo ATENEA</em>
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Sistema de Agendamiento ATENEA</strong></p>
+            <p>Este es un correo automático. Por favor no respondas a este mensaje.</p>
+            <p style="margin-top: 15px;">
+                <small>Si recibiste este correo por error, por favor ignóralo.</small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -314,6 +314,33 @@ class Cita(models.Model):
     # Campos de auditoría
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Creación')
     fecha_actualizacion = models.DateTimeField(auto_now=True, verbose_name='Fecha de Actualización')
+
+    # ============================================
+    # CAMPOS MICROSOFT TEAMS (AUTOMÁTICO)
+    # ============================================
+    
+    url_teams = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='Enlace de Microsoft Teams',
+        help_text='URL de la reunión de Teams (generada automáticamente)'
+    )
+    
+    teams_event_id = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name='ID del Evento en Microsoft Graph',
+        help_text='ID interno del evento de Teams en Microsoft Calendar'
+    )
+    
+    teams_creado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha de Creación de Teams',
+        help_text='Timestamp de cuándo se creó la reunión de Teams'
+    )
     
     class Meta:
         verbose_name = 'Cita'
@@ -409,6 +436,18 @@ class Cita(models.Model):
             return time(14, 0) <= hora <= time(16, 20)
         
         return False
+    
+    def tiene_enlace_teams(self):
+        """Verifica si la cita tiene enlace de Teams"""
+        return bool(self.url_teams and self.url_teams.strip())
+    
+    def puede_crear_teams(self):
+        """Verifica si se puede crear Teams automáticamente"""
+        return self.estado == 'agendada' and not self.tiene_enlace_teams()
+    
+    def puede_eliminar_teams(self):
+        """Verifica si se puede eliminar Teams automáticamente"""
+        return bool(self.teams_event_id)
     
     def puede_cancelarse(self):
         """Verifica si la cita puede cancelarse (2 horas de antelación)"""
