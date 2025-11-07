@@ -60,16 +60,6 @@
                             </a>
                         </li>
                         {% endif %}
-                        {% comment %}
-                        <!-- Enlace al Admin - Solo para superusuarios -->
-                        {% if user.is_superuser %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/">
-                                <i class="bi bi-gear"></i> Admin
-                            </a>
-                        </li>
-                        {% endif %}
-                        {% endcomment %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
@@ -84,11 +74,6 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'usuarios:login' %}">
                                 <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'usuarios:registro' %}">
-                                <i class="bi bi-person-plus"></i> Registrarse
                             </a>
                         </li>
                     {% endif %}

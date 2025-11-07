@@ -9,6 +9,9 @@ from .forms import RegistroForm, PerfilForm
 def login_view(request):
     """Vista para el login de usuarios"""
     if request.user.is_authenticated:
+        # Si ya está autenticado, redirigir según el tipo de usuario
+        if request.user.es_asesor():
+            return redirect('citas:panel_asesor')
         return redirect('home')
     
     if request.method == 'POST':
@@ -20,8 +23,15 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'¡Bienvenido {user.get_full_name()}!')
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
+                
+                # Redirigir según el tipo de usuario
+                if user.es_asesor():
+                    # Asesores van al panel de asesor
+                    return redirect('citas:panel_asesor')
+                else:
+                    # Clientes van al home o a 'next' si existe
+                    next_url = request.GET.get('next', 'home')
+                    return redirect(next_url)
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
     else:
@@ -68,4 +78,3 @@ def perfil_view(request):
         form = PerfilForm(instance=request.user)
     
     return render(request, 'usuarios/perfil.html', {'form': form})
-
