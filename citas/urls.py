@@ -18,4 +18,7 @@ urlpatterns = [
     path('panel-asesor/', views.panel_asesor_view, name='panel_asesor'),
     path('atender/<int:cita_id>/', views.atender_cita_view, name='atender_cita'),
     path('mis-interacciones/', views.mis_interacciones_view, name='mis_interacciones'),
+    
+    # API endpoints
+    path('api/buscar-solicitante/', views.buscar_solicitante_api, name='api_buscar_solicitante'),
 ]

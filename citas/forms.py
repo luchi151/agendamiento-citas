@@ -518,4 +518,19 @@ class SeleccionFechaHoraForm(forms.Form):
             if citas_existentes:
                 raise ValidationError('Ya existe una cita agendada en ese horario. Por favor seleccione otro.')
         
-        return cleaned_data    
+        return cleaned_data
+    def validar_cita_activa(self, tipo_documento, numero_documento):
+        """
+        Validar que el solicitante no tenga otra cita activa
+        Este método debe ser llamado desde la vista antes de guardar
+        """
+        from django.utils import timezone
+        
+        cita_activa = Cita.objects.filter(
+            solicitante__tipo_documento=tipo_documento,
+            solicitante__numero_documento=numero_documento,
+            estado='agendada',
+            fecha__gte=timezone.now().date()
+        ).exists()
+        
+        return not cita_activa    

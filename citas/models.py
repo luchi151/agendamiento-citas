@@ -255,6 +255,66 @@ class Solicitante(models.Model):
             tipo_documento=tipo_documento,
             numero_documento=numero_documento
         ).order_by('-fecha_registro')
+    
+    # ========================================
+    # NUEVOS MÉTODOS PARA VALIDAR CITA ACTIVA
+    # ========================================
+    
+    @classmethod
+    def tiene_cita_activa(cls, tipo_documento, numero_documento):
+        """
+        Verifica si un solicitante tiene una cita activa
+        
+        Args:
+            tipo_documento: Tipo de documento del solicitante
+            numero_documento: Número de documento del solicitante
+        
+        Returns:
+            bool: True si tiene una cita activa, False en caso contrario
+        """
+        return Cita.objects.filter(
+            solicitante__tipo_documento=tipo_documento,
+            solicitante__numero_documento=numero_documento,
+            estado='agendada',
+            fecha__gte=timezone.now().date()
+        ).exists()
+    
+    @classmethod
+    def get_cita_activa(cls, tipo_documento, numero_documento):
+        """
+        Obtiene la cita activa de un solicitante si existe
+        
+        Args:
+            tipo_documento: Tipo de documento del solicitante
+            numero_documento: Número de documento del solicitante
+        
+        Returns:
+            Cita: La cita activa o None si no existe
+        """
+        return Cita.objects.filter(
+            solicitante__tipo_documento=tipo_documento,
+            solicitante__numero_documento=numero_documento,
+            estado='agendada',
+            fecha__gte=timezone.now().date()
+        ).select_related('solicitante').first()
+    
+    def tiene_cita_activa_propia(self):
+        """
+        Verifica si este solicitante específico tiene una cita activa
+        
+        Returns:
+            bool: True si tiene una cita activa, False en caso contrario
+        """
+        return Solicitante.tiene_cita_activa(self.tipo_documento, self.numero_documento)
+    
+    def get_cita_activa_propia(self):
+        """
+        Obtiene la cita activa de este solicitante si existe
+        
+        Returns:
+            Cita: La cita activa o None si no existe
+        """
+        return Solicitante.get_cita_activa(self.tipo_documento, self.numero_documento)
 
 
 class Cita(models.Model):
@@ -304,11 +364,6 @@ class Cita(models.Model):
         blank=True,
         null=True,
         verbose_name='Motivo de la Cita'
-    )
-    url_teams = models.URLField(
-        blank=True,
-        null=True,
-        verbose_name='URL de Teams'
     )
     
     # Campos de auditoría
@@ -410,6 +465,37 @@ class Cita(models.Model):
                 raise ValidationError(
                     f'Debe agendar con al menos {settings.ANTELACION_MINIMA_AGENDAMIENTO_HORAS} hora(s) de antelación.'
                 )
+            
+            # ========================================
+            # NUEVA VALIDACIÓN: Cita activa única por solicitante
+            # ========================================
+            
+            # Validar que el solicitante no tenga otra cita activa
+            if self.solicitante:
+                cita_activa = Cita.objects.filter(
+                    solicitante__tipo_documento=self.solicitante.tipo_documento,
+                    solicitante__numero_documento=self.solicitante.numero_documento,
+                    estado='agendada',
+                    fecha__gte=ahora.date()
+                ).exists()
+                
+                if cita_activa:
+                    raise ValidationError(
+                        'Ya tienes una cita agendada activa. No puedes agendar otra cita hasta completar o cancelar la existente.'
+                    )
+            
+            # Validar para usuarios del sistema antiguo
+            elif self.usuario:
+                cita_activa = Cita.objects.filter(
+                    usuario=self.usuario,
+                    estado='agendada',
+                    fecha__gte=ahora.date()
+                ).exists()
+                
+                if cita_activa:
+                    raise ValidationError(
+                        'Ya tienes una cita agendada activa. No puedes agendar otra cita hasta completar o cancelar la existente.'
+                    )
     
     def es_horario_valido(self):
         """

@@ -148,6 +148,52 @@
             border-top: 1px solid #e0e0e0;
             margin-top: 50px;
         }
+        
+        /* Estilos para indicador de carga */
+        .datos-encontrados {
+            background: #c8e6c9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            display: none;
+        }
+        
+        .datos-encontrados.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading-indicator {
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .loading-indicator i {
+            font-size: 1.2rem;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body>
@@ -171,6 +217,12 @@
                 Por favor completa toda la información para poder agendar tu cita.
             </div>
             
+            <!-- Mensaje de datos encontrados -->
+            <div class="datos-encontrados" id="mensajeDatosEncontrados">
+                <i class="bi bi-check-circle-fill"></i>
+                <strong>¡Encontramos tus datos!</strong> Hemos cargado tu información previa. Puedes actualizarla si es necesario.
+            </div>
+            
             {% if messages %}
                 {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -180,7 +232,7 @@
                 {% endfor %}
             {% endif %}
             
-            <form method="post">
+            <form method="post" id="formSolicitante">
                 {% csrf_token %}
                 
                 <!-- Sección: Información Personal -->
@@ -205,6 +257,10 @@
                                 {{ form.numero_documento.label }}
                             </label>
                             {{ form.numero_documento }}
+                            <span class="loading-indicator" id="loadingIndicator" style="display: none;">
+                                <i class="bi bi-arrow-repeat spin text-primary"></i>
+                                <small class="text-muted">Buscando datos...</small>
+                            </span>
                             {% if form.numero_documento.errors %}
                                 <div class="text-danger mt-1">{{ form.numero_documento.errors }}</div>
                             {% endif %}
@@ -439,20 +495,156 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Mostrar/ocultar campo de tipo de discapacidad
         document.addEventListener('DOMContentLoaded', function() {
-            const tieneDiscapacidad = document.querySelector('[name="tiene_discapacidad"]');
-            const tipoDiscapacidad = document.querySelector('[name="tipo_discapacidad"]').closest('.mb-3');
+            // Referencias a elementos
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const mensajeDatosEncontrados = document.getElementById('mensajeDatosEncontrados');
+            const tipoDocumentoSelect = document.querySelector('[name="tipo_documento"]');
+            const numeroDocumentoInput = document.querySelector('[name="numero_documento"]');
             
-            function toggleTipoDiscapacidad() {
-                if (tieneDiscapacidad.value === 'True') {
-                    tipoDiscapacidad.style.display = 'block';
-                } else {
-                    tipoDiscapacidad.style.display = 'none';
+            // Variable para controlar si ya se buscó
+            let yaBusco = false;
+            let timeoutId = null;
+            
+            // Función principal para buscar datos del solicitante
+            async function buscarDatosSolicitante() {
+                const tipoDocumento = tipoDocumentoSelect.value;
+                const numeroDocumento = numeroDocumentoInput.value.trim();
+                
+                // Validar que se hayan ingresado ambos campos
+                if (!tipoDocumento || !numeroDocumento) {
+                    return; // Salir silenciosamente si no están completos
+                }
+                
+                // Si ya se buscó, no volver a buscar
+                if (yaBusco) {
+                    return;
+                }
+                
+                // Marcar que ya se realizó la búsqueda
+                yaBusco = true;
+                
+                // Mostrar indicador de carga
+                loadingIndicator.style.display = 'flex';
+                mensajeDatosEncontrados.classList.remove('show');
+                
+                try {
+                    // Hacer petición AJAX
+                    const response = await fetch(
+                        `/citas/api/buscar-solicitante/?tipo_documento=${encodeURIComponent(tipoDocumento)}&numero_documento=${encodeURIComponent(numeroDocumento)}`
+                    );
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.encontrado) {
+                        // Llenar formulario con los datos encontrados
+                        llenarFormulario(data.datos);
+                        
+                        // Mostrar mensaje de éxito
+                        mensajeDatosEncontrados.classList.add('show');
+                        
+                        // Scroll suave hacia arriba
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else if (data.success && !data.encontrado) {
+                        // No se encontraron datos previos - no mostrar alerta
+                        console.log('No se encontraron datos previos para este documento');
+                    } else {
+                        // Error en la búsqueda
+                        console.error('Error al buscar datos:', data);
+                    }
+                } catch (error) {
+                    console.error('Error de conexión:', error);
+                } finally {
+                    // Ocultar indicador de carga
+                    loadingIndicator.style.display = 'none';
                 }
             }
             
-            tieneDiscapacidad.addEventListener('change', toggleTipoDiscapacidad);
+            // Búsqueda automática al salir del campo de número de documento (blur)
+            numeroDocumentoInput.addEventListener('blur', function() {
+                // Pequeño delay para permitir que se complete cualquier acción
+                timeoutId = setTimeout(function() {
+                    buscarDatosSolicitante();
+                }, 300);
+            });
+            
+            // Búsqueda automática al cambiar el tipo de documento (si ya hay número)
+            tipoDocumentoSelect.addEventListener('change', function() {
+                if (numeroDocumentoInput.value.trim()) {
+                    yaBusco = false; // Resetear para permitir nueva búsqueda
+                    buscarDatosSolicitante();
+                }
+            });
+            
+            // Permitir buscar con Enter en el campo de número de documento
+            numeroDocumentoInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Cancelar timeout si existe
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
+                    yaBusco = false; // Permitir búsqueda manual
+                    buscarDatosSolicitante();
+                }
+            });
+            
+            // Resetear flag cuando se modifica el número de documento
+            numeroDocumentoInput.addEventListener('input', function() {
+                yaBusco = false;
+                mensajeDatosEncontrados.classList.remove('show');
+            });
+            
+            // Función para llenar el formulario con los datos
+            function llenarFormulario(datos) {
+                // Llenar campos de texto
+                document.querySelector('[name="nombre"]').value = datos.nombre || '';
+                document.querySelector('[name="apellido"]').value = datos.apellido || '';
+                document.querySelector('[name="celular"]').value = datos.celular || '';
+                document.querySelector('[name="correo_electronico"]').value = datos.correo_electronico || '';
+                document.querySelector('[name="tipo_discapacidad"]').value = datos.tipo_discapacidad || '';
+                
+                // Llenar selects
+                setSelectValue('[name="sexo"]', datos.sexo);
+                setSelectValue('[name="genero"]', datos.genero);
+                setSelectValue('[name="orientacion_sexual"]', datos.orientacion_sexual);
+                setSelectValue('[name="rango_edad"]', datos.rango_edad);
+                setSelectValue('[name="nivel_educativo"]', datos.nivel_educativo);
+                setSelectValue('[name="grupo_etnico"]', datos.grupo_etnico);
+                setSelectValue('[name="grupo_poblacional"]', datos.grupo_poblacional);
+                setSelectValue('[name="estrato_socioeconomico"]', datos.estrato_socioeconomico);
+                setSelectValue('[name="localidad"]', datos.localidad);
+                setSelectValue('[name="calidad_comunicacion"]', datos.calidad_comunicacion);
+                
+                // Llenar campo de discapacidad (es un select especial)
+                const tieneDiscapacidadSelect = document.querySelector('[name="tiene_discapacidad"]');
+                if (tieneDiscapacidadSelect) {
+                    tieneDiscapacidadSelect.value = datos.tiene_discapacidad ? 'True' : 'False';
+                    toggleTipoDiscapacidad(); // Actualizar visibilidad del campo
+                }
+            }
+            
+            // Función helper para establecer valor de un select
+            function setSelectValue(selector, value) {
+                const select = document.querySelector(selector);
+                if (select && value) {
+                    select.value = value;
+                }
+            }
+            
+            // Mostrar/ocultar campo de tipo de discapacidad
+            const tieneDiscapacidadSelect = document.querySelector('[name="tiene_discapacidad"]');
+            const tipoDiscapacidadDiv = document.querySelector('[name="tipo_discapacidad"]').closest('.mb-3');
+            
+            function toggleTipoDiscapacidad() {
+                if (tieneDiscapacidadSelect.value === 'True') {
+                    tipoDiscapacidadDiv.style.display = 'block';
+                } else {
+                    tipoDiscapacidadDiv.style.display = 'none';
+                }
+            }
+            
+            tieneDiscapacidadSelect.addEventListener('change', toggleTipoDiscapacidad);
             toggleTipoDiscapacidad(); // Ejecutar al cargar
         });
     </script>

@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from .models import Cita, Interaccion
@@ -160,7 +162,8 @@ def agendar_cita_publica_view(request):
     Si el solicitante existe, pre-llena el formulario con sus últimos datos
     """
     from .forms import SolicitanteForm
-    from .models import Solicitante
+    from .models import Solicitante, Cita
+    from django.utils import timezone
     
     # Si viene de un POST previo con documento para buscar
     tipo_doc = request.GET.get('tipo_documento')
@@ -170,9 +173,29 @@ def agendar_cita_publica_view(request):
     
     # Si se proporcionó documento, intentar traer último registro
     if tipo_doc and numero_doc:
+        # ========================================
+        # NUEVA VALIDACIÓN: Verificar cita activa temprano
+        # ========================================
+        cita_activa = Cita.objects.filter(
+            solicitante__tipo_documento=tipo_doc,
+            solicitante__numero_documento=numero_doc,
+            estado='agendada',
+            fecha__gte=timezone.now().date()
+        ).select_related('solicitante').first()
+        
+        if cita_activa:
+            messages.warning(
+                request,
+                f'Ya tienes una cita agendada para el {cita_activa.fecha.strftime("%d/%m/%Y")} '
+                f'a las {cita_activa.hora_inicio.strftime("%H:%M")}. '
+                f'No puedes agendar otra cita hasta completar o cancelar la existente.'
+            )
+            # Opcionalmente, redirigir al home o a consultar cita
+            # return redirect('home')
+        
         ultimo_registro = Solicitante.get_ultimo_registro(tipo_doc, numero_doc)
-        if ultimo_registro:
-            # Pre-llenar con datos del último registro
+        if ultimo_registro and not cita_activa:
+            # Pre-llenar con datos del último registro solo si NO tiene cita activa
             initial_data = {
                 'tipo_documento': ultimo_registro.tipo_documento,
                 'numero_documento': ultimo_registro.numero_documento,
@@ -198,6 +221,28 @@ def agendar_cita_publica_view(request):
     if request.method == 'POST':
         form = SolicitanteForm(request.POST)
         if form.is_valid():
+            # ========================================
+            # NUEVA VALIDACIÓN: Verificar cita activa antes de continuar
+            # ========================================
+            tipo_doc = form.cleaned_data['tipo_documento']
+            numero_doc = form.cleaned_data['numero_documento']
+            
+            cita_activa = Cita.objects.filter(
+                solicitante__tipo_documento=tipo_doc,
+                solicitante__numero_documento=numero_doc,
+                estado='agendada',
+                fecha__gte=timezone.now().date()
+            ).select_related('solicitante').first()
+            
+            if cita_activa:
+                messages.error(
+                    request,
+                    f'Ya tienes una cita agendada para el {cita_activa.fecha.strftime("%d/%m/%Y")} '
+                    f'a las {cita_activa.hora_inicio.strftime("%H:%M")}. '
+                    f'No puedes agendar otra cita hasta completar o cancelar la existente.'
+                )
+                return render(request, 'citas/agendar_paso1_solicitante.html', {'form': form})
+            
             # Guardar datos en sesión para el siguiente paso
             request.session['solicitante_data'] = {
                 'tipo_documento': form.cleaned_data['tipo_documento'],
@@ -282,6 +327,7 @@ def agendar_paso2_fecha_view(request):
     from .models import Solicitante, Cita
     from datetime import timedelta
     from .email_utils import enviar_email_confirmacion_cita
+    from django.utils import timezone
     
     # Verificar que existan datos del solicitante en sesión
     solicitante_data = request.session.get('solicitante_data')
@@ -289,9 +335,52 @@ def agendar_paso2_fecha_view(request):
         messages.warning(request, 'Sesión expirada. Por favor ingresa tus datos nuevamente.')
         return redirect('citas:agendar_cita')
     
+    # ========================================
+    # NUEVA VALIDACIÓN: Verificar cita activa ANTES de mostrar el formulario
+    # ========================================
+    ahora = timezone.now()
+    cita_activa_existente = Cita.objects.filter(
+        solicitante__tipo_documento=solicitante_data['tipo_documento'],
+        solicitante__numero_documento=solicitante_data['numero_documento'],
+        estado='agendada',
+        fecha__gte=ahora.date()
+    ).select_related('solicitante').first()
+    
+    if cita_activa_existente:
+        messages.error(
+            request, 
+            f'Ya tienes una cita agendada activa para el {cita_activa_existente.fecha.strftime("%d/%m/%Y")} '
+            f'a las {cita_activa_existente.hora_inicio.strftime("%H:%M")}. '
+            f'No puedes agendar otra cita hasta completar o cancelar la existente.'
+        )
+        # Limpiar sesión
+        if 'solicitante_data' in request.session:
+            del request.session['solicitante_data']
+        return redirect('home')
+    
     if request.method == 'POST':
         form = SeleccionFechaHoraForm(request.POST)
         if form.is_valid():
+            # ========================================
+            # VALIDACIÓN ADICIONAL: Verificar nuevamente antes de crear
+            # ========================================
+            cita_activa = Cita.objects.filter(
+                solicitante__tipo_documento=solicitante_data['tipo_documento'],
+                solicitante__numero_documento=solicitante_data['numero_documento'],
+                estado='agendada',
+                fecha__gte=ahora.date()
+            ).exists()
+            
+            if cita_activa:
+                messages.error(
+                    request,
+                    'Ya tienes una cita agendada activa. No puedes agendar otra cita hasta completar o cancelar la existente.'
+                )
+                # Limpiar sesión
+                if 'solicitante_data' in request.session:
+                    del request.session['solicitante_data']
+                return redirect('home')
+            
             # Crear el Solicitante
             solicitante = Solicitante.objects.create(
                 tipo_documento=solicitante_data['tipo_documento'],
@@ -324,45 +413,52 @@ def agendar_paso2_fecha_view(request):
             dt_fin = dt_inicio + timedelta(minutes=20)
             hora_fin = dt_fin.time()
             
-            # Crear la Cita
-            cita = Cita.objects.create(
-                solicitante=solicitante,
-                fecha=fecha,
-                hora_inicio=hora_inicio,
-                hora_fin=hora_fin,
-                estado='agendada',
-                motivo=form.cleaned_data.get('motivo', ''),
-            )
-
-            # ========================================
-            # ENVIAR EMAIL DE CONFIRMACIÓN
-            # ========================================
-            email_enviado = enviar_email_confirmacion_cita(cita)
-            if email_enviado:
-                messages.success(
-                    request, 
-                    '¡Cita agendada exitosamente! Te hemos enviado un email de confirmación.'
+            try:
+                # Crear la Cita
+                cita = Cita(
+                    solicitante=solicitante,
+                    fecha=fecha,
+                    hora_inicio=hora_inicio,
+                    hora_fin=hora_fin,
+                    estado='agendada',
+                    motivo=form.cleaned_data.get('motivo', ''),
                 )
-            else:
-                messages.success(
-                    request, 
-                    '¡Cita agendada exitosamente! (No pudimos enviar el email de confirmación)'
-                )
-            # ========================================
-            
-            # Guardar ID de cita en sesión para confirmación
-            request.session['cita_id'] = cita.id
-            
-            # Limpiar datos del solicitante de la sesión
-            del request.session['solicitante_data']
-            
-            messages.success(request, '¡Cita agendada exitosamente!')
-            return redirect('citas:agendar_confirmacion')
+                
+                # Validar antes de guardar (ejecuta el método clean del modelo)
+                cita.full_clean()
+                cita.save()
+                
+                # Enviar email de confirmación
+                email_enviado = enviar_email_confirmacion_cita(cita)
+                if email_enviado:
+                    messages.success(
+                        request, 
+                        '¡Cita agendada exitosamente! Te hemos enviado un email de confirmación.'
+                    )
+                else:
+                    messages.success(
+                        request, 
+                        '¡Cita agendada exitosamente! (No pudimos enviar el email de confirmación)'
+                    )
+                
+                # Guardar ID de cita en sesión para confirmación
+                request.session['cita_id'] = cita.id
+                
+                # Limpiar datos del solicitante de la sesión
+                del request.session['solicitante_data']
+                
+                return redirect('citas:agendar_confirmacion')
+                
+            except ValidationError as e:
+                # Capturar errores de validación del modelo
+                messages.error(request, str(e))
+                # Si la validación falla, eliminar el solicitante creado
+                solicitante.delete()
+                
     else:
         form = SeleccionFechaHoraForm()
     
     # Preparar datos para mostrar en el template
-    # Crear un objeto simulado con método get_tipo_documento_display
     class SolicitanteDisplay:
         def __init__(self, data):
             self.data = data
@@ -538,3 +634,58 @@ def mis_interacciones_view(request):
         'no_asiste': no_asiste,
     }
     return render(request, 'citas/mis_interacciones.html', context)
+
+@require_http_methods(["GET"])
+def buscar_solicitante_api(request):
+    """
+    API endpoint para buscar un solicitante por tipo y número de documento
+    Retorna los datos en formato JSON si existe
+    """
+    tipo_documento = request.GET.get('tipo_documento')
+    numero_documento = request.GET.get('numero_documento')
+    
+    # Validar que se enviaron ambos parámetros
+    if not tipo_documento or not numero_documento:
+        return JsonResponse({
+            'success': False,
+            'message': 'Faltan parámetros requeridos'
+        }, status=400)
+    
+    # Buscar el último registro del solicitante
+    from .models import Solicitante
+    solicitante = Solicitante.get_ultimo_registro(tipo_documento, numero_documento)
+    
+    if solicitante:
+        # Retornar los datos del solicitante
+        return JsonResponse({
+            'success': True,
+            'encontrado': True,
+            'datos': {
+                'tipo_documento': solicitante.tipo_documento,
+                'numero_documento': solicitante.numero_documento,
+                'nombre': solicitante.nombre,
+                'apellido': solicitante.apellido,
+                'celular': solicitante.celular,
+                'correo_electronico': solicitante.correo_electronico,
+                'sexo': solicitante.sexo,
+                'genero': solicitante.genero,
+                'orientacion_sexual': solicitante.orientacion_sexual,
+                'rango_edad': solicitante.rango_edad,
+                'nivel_educativo': solicitante.nivel_educativo,
+                'grupo_etnico': solicitante.grupo_etnico,
+                'grupo_poblacional': solicitante.grupo_poblacional,
+                'estrato_socioeconomico': solicitante.estrato_socioeconomico,
+                'localidad': solicitante.localidad,
+                'calidad_comunicacion': solicitante.calidad_comunicacion,
+                'tiene_discapacidad': solicitante.tiene_discapacidad,
+                'tipo_discapacidad': solicitante.tipo_discapacidad or '',
+            },
+            'message': 'Encontramos tus datos previos. Puedes actualizarlos si es necesario.'
+        })
+    else:
+        # No se encontró el solicitante
+        return JsonResponse({
+            'success': True,
+            'encontrado': False,
+            'message': 'No encontramos registros previos con este documento.'
+        })
