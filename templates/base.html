@@ -28,9 +28,15 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-calendar-check"></i> Sistema de Citas
-            </a>
+            {% if user.is_authenticated and user.es_asesor %}
+                <a class="navbar-brand" href="{% url 'citas:panel_asesor' %}">
+                    <i class="bi bi-calendar-check"></i> Sistema de Citas
+                </a>
+            {% else %}
+                <a class="navbar-brand" href="/">
+                    <i class="bi bi-calendar-check"></i> Sistema de Citas
+                </a>
+            {% endif %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
