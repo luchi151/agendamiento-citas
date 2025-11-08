@@ -18,8 +18,8 @@
         }
         
         .header-bar {
-            background: linear-gradient(90deg, #0d47a1 0%, #1976d2 100%);
-            padding: 10px 0;
+            background: #3366cc;
+            padding: 7px 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
@@ -30,35 +30,44 @@
         }
         
         .logo {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             background: #ff6f00;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            flex-shrink: 0;
         }
         
         .logo i {
-            font-size: 3rem;
+            font-size: 2rem;
             color: white;
+        }
+        
+        .title-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0 20px 0;
         }
         
         .main-title {
             color: #0d47a1;
             font-weight: bold;
             font-size: 2.5rem;
-            margin: 30px 0 20px 0;
-            text-align: center;
+            margin: 0;
+            flex: 1;
         }
         
         .info-section {
-            background: #fff3e0;
-            border-left: 5px solid #ff6f00;
+            /* background: #fff3e0;
+            border-left: 5px solid #ff6f00; */
             padding: 20px;
             margin: 20px 0;
             border-radius: 5px;
+            text-align: center;
         }
         
         .info-section h5 {
@@ -70,6 +79,26 @@
         .info-section p {
             margin-bottom: 5px;
             color: #424242;
+        }
+        
+        .legal-notice {
+            background: #e3f2fd;
+            border: 2px solid #1976d2;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .legal-notice p {
+            margin: 0;
+            color: #0d47a1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .legal-notice strong {
+            color: #0d47a1;
         }
         
         .warning-text {
@@ -165,27 +194,58 @@
             margin-top: 50px;
             border-top: 1px solid #e0e0e0;
         }
+        
+        @media (max-width: 768px) {
+            .title-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .main-title {
+                font-size: 1.8rem;
+            }
+            
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .logo i {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Header Bar -->
     <div class="header-bar">
         <div class="container">
-            <div class="logo-container">
-                <div class="logo">
-                    <i class="bi bi-headset"></i>
-                </div>
-            </div>
+            <!-- Header vacío o con navegación mínima si lo necesitas -->
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
         <div class="container">
-            <!-- Título Principal -->
-            <h1 class="main-title">
-                Elige la opción que necesites para acceder a nuestros servicios
-            </h1>
+            <!-- Título Principal con Logo -->
+            <div class="title-section">
+                <div class="logo">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <h1 class="main-title">
+                    Elige la opción que necesites para acceder a nuestros servicios
+                </h1>
+            </div>
+
+            <!-- Aviso Legal -->
+            <div class="legal-notice">
+                <p>
+                    <strong><i class="bi bi-shield-check"></i></strong> 
+                    Recuerda que la información suministrada deberá ser veraz, completa, exacta, actualizada, 
+                    correcta y comprobable, a fin de asegurar tu atención. 
+                    <strong>Ley 1581 de 2012 Art. 4.</strong>
+                </p>
+            </div>
 
             <!-- Mensaje sobre discapacidad auditiva -->
             <div class="info-section">
@@ -193,8 +253,8 @@
                     <i class="bi bi-info-circle-fill"></i>
                     Recuerda que este canal es de uso exclusivo para personas con discapacidad auditiva.
                 </h5>
-                <p><strong>Horario de atención:</strong></p>
-                <p>Lunes a Viernes de 07:00 a.m. a 5:00 p.m.</p>
+                <!-- <p><strong>Horario de atención:</strong></p>
+                <p>Lunes a Viernes de 07:00 a.m. a 5:00 p.m.</p> -->
             </div>
 
             <!-- Advertencia -->
@@ -258,7 +318,7 @@
                 </div>
             </div>
 
-            <!-- Botón Volver (por ahora va a la misma página) -->
+            <!-- Botón Volver -->
             <button onclick="window.location.href='/'" class="btn btn-back">
                 Volver al menú principal
             </button>
@@ -271,8 +331,7 @@
             <p class="mb-0">&copy; 2024 Sistema de Agendamiento ATENEA. Todos los derechos reservados.</p>
             <p class="mt-2">
                 <a href="/usuarios/login/" style="color: #9e9e9e; text-decoration: none; font-size: 0.85rem;">
-                    <i class="bi bi-person-badge"></i>Acceso Asesores
-
+                    <i class="bi bi-person-badge"></i> Acceso Asesores
                 </a>
             </p>
         </div>
