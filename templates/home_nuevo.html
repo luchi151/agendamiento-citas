@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -30,14 +31,12 @@
         }
         
         .logo {
-            width: 60px;
-            height: 60px;
-            background: #ff6f00;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             flex-shrink: 0;
         }
         
@@ -230,7 +229,7 @@
             <!-- Título Principal con Logo -->
             <div class="title-section">
                 <div class="logo">
-                    <i class="bi bi-headset"></i>
+                    <img src="{% static 'img/atenea.png' %}" alt="ATENEA Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
                 </div>
                 <h1 class="main-title">
                     Elige la opción que necesites para acceder a nuestros servicios
