@@ -1,418 +1,273 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleccionar Fecha y Hora - ATENEA</title>
+{% extends 'citas/base_citas.html' %}
+
+{% block title %}Seleccionar Fecha y Hora - ATENEA{% endblock %}
+
+{% block page_title %}Agendar Nueva Cita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress-container {
+        max-width: 600px;
+        margin: 20px auto 40px auto;
+    }
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    .progress-step {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
     
-    <style>
-        body {
-            background-color: #f5f5f5;
-            min-height: 100vh;
-        }
-        
-        .header-bar {
-            background: linear-gradient(90deg, #0d47a1 0%, #1976d2 100%);
-            padding: 15px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .logo {
-            width: 60px;
-            height: 60px;
-            background: #ff6f00;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .logo i {
-            font-size: 2rem;
-            color: white;
-        }
-        
-        .main-title {
-            color: #0d47a1;
-            font-weight: bold;
-            font-size: 2rem;
-            margin: 30px 0 20px 0;
-            text-align: center;
-        }
-        
-        .progress-container {
-            max-width: 600px;
-            margin: 20px auto 40px auto;
-        }
-        
-        .progress-step {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-        }
-        
-        .step {
-            flex: 1;
-            text-align: center;
-            position: relative;
-        }
-        
-        .step-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            color: #757575;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px auto;
-            font-weight: bold;
-            font-size: 1.2rem;
-            border: 3px solid #e0e0e0;
-            transition: all 0.3s;
-        }
-        
-        .step-circle.active {
-            background: #0d47a1;
-            color: white;
-            border-color: #0d47a1;
-        }
-        
-        .step-circle.completed {
-            background: #4caf50;
-            color: white;
-            border-color: #4caf50;
-        }
-        
-        .step-label {
-            font-size: 0.9rem;
-            color: #757575;
-            font-weight: 500;
-        }
-        
-        .step-label.active {
-            color: #0d47a1;
-            font-weight: bold;
-        }
-        
-        .form-container {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 40px;
-            margin: 30px auto 50px auto;
-            max-width: 800px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .section-title {
-            color: #0d47a1;
-            font-weight: bold;
-            font-size: 1.5rem;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #ff6f00;
-        }
-        
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #1976d2;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 25px;
-        }
-        
-        .info-box i {
-            color: #1976d2;
-            font-size: 1.2rem;
-        }
-        
-        .horario-info {
-            background: #fff3e0;
-            border-left: 4px solid #ff6f00;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 25px;
-        }
-        
-        .horario-info h6 {
-            color: #e65100;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .horario-info ul {
-            margin-bottom: 0;
-            padding-left: 20px;
-        }
-        
-        .horario-info li {
-            color: #424242;
-            margin-bottom: 5px;
-        }
-        
-        .form-label {
-            color: #424242;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        
-        .required::after {
-            content: " *";
-            color: #d32f2f;
-        }
-        
-        .form-control, .form-select {
-            border: 1px solid #bdbdbd;
-            border-radius: 8px;
-            padding: 10px 15px;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: #0d47a1;
-            box-shadow: 0 0 0 0.2rem rgba(13, 71, 161, 0.25);
-        }
-        
-        .btn-volver {
-            background-color: white;
-            color: #0d47a1;
-            border: 2px solid #0d47a1;
-            border-radius: 25px;
-            padding: 12px 35px;
-            font-weight: bold;
-        }
-        
-        .btn-volver:hover {
-            background-color: #f5f5f5;
-            color: #0d47a1;
-        }
-        
-        .btn-agendar {
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 35px;
-            font-weight: bold;
-        }
-        
-        .btn-agendar:hover {
-            background-color: #388e3c;
-            color: white;
-        }
-        
-        .resumen-datos {
-            background: #f5f5f5;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-        
-        .resumen-datos h6 {
-            color: #0d47a1;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        
-        .resumen-datos p {
-            margin-bottom: 5px;
-            color: #424242;
-        }
-        
-        .resumen-datos strong {
-            color: #212121;
-        }
-        
-        .footer {
-            background: #f5f5f5;
-            padding: 20px 0;
-            text-align: center;
-            color: #757575;
-            border-top: 1px solid #e0e0e0;
-            margin-top: 50px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <div class="header-bar">
-        <div class="container">
-            <div class="logo">
-                <i class="bi bi-headset"></i>
+    .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+    }
+    
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        color: #757575;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px auto;
+        font-weight: bold;
+        font-size: 1.2rem;
+        border: 3px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    
+    .step-circle.active {
+        background: #0d47a1;
+        color: white;
+        border-color: #0d47a1;
+    }
+    
+    .step-circle.completed {
+        background: #4caf50;
+        color: white;
+        border-color: #4caf50;
+    }
+    
+    .step-label {
+        font-size: 0.9rem;
+        color: #757575;
+        font-weight: 500;
+    }
+    
+    .step-label.active {
+        color: #0d47a1;
+        font-weight: bold;
+    }
+    
+    .resumen-datos {
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .resumen-datos h6 {
+        color: #0d47a1;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .resumen-datos p {
+        margin-bottom: 5px;
+        color: #424242;
+    }
+    
+    .resumen-datos strong {
+        color: #212121;
+    }
+    
+    .horario-info {
+        background: #fff3e0;
+        border-left: 4px solid #ff6f00;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 25px;
+    }
+    
+    .horario-info h6 {
+        color: #e65100;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .horario-info ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+    
+    .horario-info li {
+        color: #424242;
+        margin-bottom: 5px;
+    }
+    
+    .form-container {
+        max-width: 800px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Progress Steps -->
+<div class="progress-container">
+    <div class="progress-step">
+        <div class="step">
+            <div class="step-circle completed">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            <div class="step-label">Datos Personales</div>
+        </div>
+        <div class="step">
+            <div class="step-circle active">2</div>
+            <div class="step-label active">Seleccionar Fecha</div>
+        </div>
+        <div class="step">
+            <div class="step-circle">3</div>
+            <div class="step-label">Confirmación</div>
+        </div>
+    </div>
+</div>
+
+<div class="form-container">
+    <h2 class="section-title">
+        <i class="bi bi-calendar-check"></i> Selecciona Fecha y Hora
+    </h2>
+    
+    <!-- Resumen de Datos -->
+    <div class="resumen-datos">
+        <h6><i class="bi bi-person-fill"></i> Tus Datos:</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Nombre:</strong> {{ solicitante_data.nombre }} {{ solicitante_data.apellido }}</p>
+                <p><strong>Documento:</strong> {{ solicitante_data.get_tipo_documento_display }} {{ solicitante_data.numero_documento }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Celular:</strong> {{ solicitante_data.celular }}</p>
+                <p><strong>Email:</strong> {{ solicitante_data.correo_electronico }}</p>
             </div>
         </div>
     </div>
+    
+    <!-- Info de Horarios -->
+    <div class="horario-info">
+        <h6><i class="bi bi-clock"></i> Horarios de Atención:</h6>
+        <ul>
+            <li><strong>Martes y Miércoles:</strong> 7:00 AM - 12:40 PM y 2:20 PM - 4:20 PM</li>
+            <li><strong>Jueves:</strong> 2:00 PM - 4:20 PM</li>
+        </ul>
+        <p class="mb-0 mt-2"><small><em>Las citas tienen una duración de 20 minutos.</em></small></p>
+    </div>
 
-    <!-- Main Content -->
-    <div class="container">
-        <h1 class="main-title">Agendar Nueva Cita</h1>
-        
-        <!-- Progress Steps -->
-        <div class="progress-container">
-            <div class="progress-step">
-                <div class="step">
-                    <div class="step-circle completed">
-                        <i class="bi bi-check-lg"></i>
-                    </div>
-                    <div class="step-label">Datos Personales</div>
-                </div>
-                <div class="step">
-                    <div class="step-circle active">2</div>
-                    <div class="step-label active">Seleccionar Fecha</div>
-                </div>
-                <div class="step">
-                    <div class="step-circle">3</div>
-                    <div class="step-label">Confirmación</div>
-                </div>
-            </div>
+    <div class="alert alert-warning">
+        <h6><i class="bi bi-exclamation-triangle-fill"></i> Política de Agendamiento</h6>
+        <p class="mb-0">
+            <strong>Importante:</strong> Solo puedes tener <strong>una cita activa</strong> a la vez. 
+            Si necesitas cambiar la fecha u hora, primero debes cancelar tu cita actual y luego agendar una nueva.
+        </p>
+    </div>
+    
+    <div class="info-box">
+        <i class="bi bi-info-circle-fill"></i>
+        <strong>Importante:</strong> Debes agendar tu cita con al menos 2 horas de anticipación.
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
         
-        <div class="form-container">
-            <h2 class="section-title">
-                <i class="bi bi-calendar-check"></i> Selecciona Fecha y Hora
-            </h2>
-            
-            <!-- Resumen de Datos -->
-            <div class="resumen-datos">
-                <h6><i class="bi bi-person-fill"></i> Tus Datos:</h6>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Nombre:</strong> {{ solicitante_data.nombre }} {{ solicitante_data.apellido }}</p>
-                        <p><strong>Documento:</strong> {{ solicitante_data.get_tipo_documento_display }} {{ solicitante_data.numero_documento }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Celular:</strong> {{ solicitante_data.celular }}</p>
-                        <p><strong>Email:</strong> {{ solicitante_data.correo_electronico }}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Info de Horarios -->
-            <div class="horario-info">
-                <h6><i class="bi bi-clock"></i> Horarios de Atención:</h6>
-                <ul>
-                    <li><strong>Martes y Miércoles:</strong> 7:00 AM - 12:40 PM y 2:20 PM - 4:20 PM</li>
-                    <li><strong>Jueves:</strong> 2:00 PM - 4:20 PM</li>
-                </ul>
-                <p class="mb-0 mt-2"><small><em>Las citas tienen una duración de 20 minutos.</em></small></p>
-            </div>
-
-            <div class="alert alert-warning">
-                <h6><i class="bi bi-exclamation-triangle-fill"></i> Política de Agendamiento</h6>
-                <p class="mb-0">
-                    <strong>Importante:</strong> Solo puedes tener <strong>una cita activa</strong> a la vez. 
-                    Si necesitas cambiar la fecha u hora, primero debes cancelar tu cita actual y luego agendar una nueva.
-                </p>
-            </div>
-            
-            <div class="info-box">
-                <i class="bi bi-info-circle-fill"></i>
-                <strong>Importante:</strong> Debes agendar tu cita con al menos 2 horas de anticipación.
-            </div>
-            
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-            
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.fecha.id_for_label }}" class="form-label required">
-                            {{ form.fecha.label }}
-                        </label>
-                        {{ form.fecha }}
-                        {% if form.fecha.errors %}
-                            <div class="text-danger mt-1">{{ form.fecha.errors }}</div>
-                        {% endif %}
-                        <small class="form-text text-muted">
-                            Solo martes, miércoles o jueves
-                        </small>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.hora_inicio.id_for_label }}" class="form-label required">
-                            {{ form.hora_inicio.label }}
-                        </label>
-                        {{ form.hora_inicio }}
-                        {% if form.hora_inicio.errors %}
-                            <div class="text-danger mt-1">{{ form.hora_inicio.errors }}</div>
-                        {% endif %}
-                        <small class="form-text text-muted">
-                            Citas cada 20 minutos
-                        </small>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="{{ form.motivo.id_for_label }}" class="form-label">
-                        {{ form.motivo.label }}
-                    </label>
-                    {{ form.motivo }}
-                    {% if form.motivo.errors %}
-                        <div class="text-danger mt-1">{{ form.motivo.errors }}</div>
-                    {% endif %}
-                </div>
-                
-                <!-- Errores generales del formulario -->
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
-                    </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.fecha.id_for_label }}" class="form-label required">
+                    {{ form.fecha.label }}
+                </label>
+                {{ form.fecha }}
+                {% if form.fecha.errors %}
+                    <div class="text-danger mt-1">{{ form.fecha.errors }}</div>
                 {% endif %}
-                
-                <!-- Botones -->
-                <div class="d-flex justify-content-center gap-3 mt-4">
-                    <a href="{% url 'citas:agendar_cita' %}" class="btn btn-volver">
-                        <i class="bi bi-arrow-left"></i> Volver
-                    </a>
-                    <button type="submit" class="btn btn-agendar">
-                        <i class="bi bi-check-circle"></i> Agendar Cita
-                    </button>
-                </div>
-            </form>
+                <small class="form-text text-muted">
+                    Solo martes, miércoles o jueves
+                </small>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.hora_inicio.id_for_label }}" class="form-label required">
+                    {{ form.hora_inicio.label }}
+                </label>
+                {{ form.hora_inicio }}
+                {% if form.hora_inicio.errors %}
+                    <div class="text-danger mt-1">{{ form.hora_inicio.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">
+                    Citas cada 20 minutos
+                </small>
+            </div>
         </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <div class="container">
-            <p class="mb-0">&copy; 2024 Sistema de Agendamiento ATENEA.</p>
+        
+        <div class="mb-3">
+            <label for="{{ form.motivo.id_for_label }}" class="form-label">
+                {{ form.motivo.label }}
+            </label>
+            {{ form.motivo }}
+            {% if form.motivo.errors %}
+                <div class="text-danger mt-1">{{ form.motivo.errors }}</div>
+            {% endif %}
         </div>
-    </div>
+        
+        <!-- Errores generales del formulario -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        
+        <!-- Botones -->
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{% url 'citas:agendar_cita' %}" class="btn btn-volver">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <button type="submit" class="btn btn-confirmar">
+                <i class="bi bi-check-circle"></i> Agendar Cita
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Establecer fecha mínima (hoy + 2 horas)
-        document.addEventListener('DOMContentLoaded', function() {
-            const fechaInput = document.querySelector('[name="fecha"]');
-            const today = new Date();
-            
-            // Fecha mínima: mañana
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            const minDate = tomorrow.toISOString().split('T')[0];
-            fechaInput.setAttribute('min', minDate);
-            
-            // Fecha máxima: 3 meses adelante
-            const maxDate = new Date(today);
-            maxDate.setMonth(maxDate.getMonth() + 3);
-            fechaInput.setAttribute('max', maxDate.toISOString().split('T')[0]);
-        });
-    </script>
-</body>
-</html>
+{% block extra_js %}
+<script>
+    // Establecer fecha mínima (hoy + 2 horas)
+    document.addEventListener('DOMContentLoaded', function() {
+        const fechaInput = document.querySelector('[name="fecha"]');
+        const today = new Date();
+        
+        // Fecha mínima: mañana
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const minDate = tomorrow.toISOString().split('T')[0];
+        fechaInput.setAttribute('min', minDate);
+        
+        // Fecha máxima: 3 meses adelante
+        const maxDate = new Date(today);
+        maxDate.setMonth(maxDate.getMonth() + 3);
+        fechaInput.setAttribute('max', maxDate.toISOString().split('T')[0]);
+    });
+</script>
+{% endblock %}

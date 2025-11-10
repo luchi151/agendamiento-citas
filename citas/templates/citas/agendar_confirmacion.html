@@ -1,293 +1,224 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cita Confirmada - ATENEA</title>
+{% extends 'citas/base_citas.html' %}
+
+{% block title %}Cita Confirmada - ATENEA{% endblock %}
+
+{% block page_title %}Confirmación de Cita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirmacion-container {
+        background: white;
+        border: 2px solid #4caf50;
+        border-radius: 15px;
+        padding: 50px;
+        margin: 30px auto 50px auto;
+        max-width: 700px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-align: center;
+    }
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        background: #4caf50;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px auto;
+        animation: scaleIn 0.5s ease-out;
+    }
     
-    <style>
-        body {
-            background-color: #f5f5f5;
-            min-height: 100vh;
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
         }
+        to {
+            transform: scale(1);
+        }
+    }
+    
+    .success-icon i {
+        font-size: 4rem;
+        color: white;
+    }
+    
+    .success-title {
+        color: #4caf50;
+        font-weight: bold;
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+    
+    .success-message {
+        color: #424242;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+    
+    .cita-detalles {
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 30px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .cita-detalles h5 {
+        color: #0d47a1;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .detalle-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        background: white;
+        border-radius: 8px;
+        border-left: 4px solid #0d47a1;
+    }
+    
+    .detalle-item i {
+        font-size: 1.5rem;
+        color: #0d47a1;
+        margin-right: 15px;
+        width: 30px;
+    }
+    
+    .detalle-item .detalle-label {
+        font-weight: 500;
+        color: #757575;
+        margin-right: 10px;
+    }
+    
+    .detalle-item .detalle-value {
+        font-weight: bold;
+        color: #212121;
+    }
+    
+    .info-importante {
+        background: #fff3e0;
+        border-left: 4px solid #ff6f00;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .info-importante h6 {
+        color: #e65100;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .info-importante ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+    
+    .info-importante li {
+        color: #424242;
+        margin-bottom: 10px;
+    }
+    
+    .btn-home {
+        background-color: #0d47a1;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 40px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .btn-home:hover {
+        background-color: #1565c0;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmacion-container">
+    <div class="success-icon">
+        <i class="bi bi-check-circle-fill"></i>
+    </div>
+    
+    <h2 class="success-title">¡Cita Agendada Exitosamente!</h2>
+    
+    <p class="success-message">
+        Tu cita ha sido registrada correctamente. Recibirás un correo electrónico con los detalles.
+    </p>
+    
+    <div class="cita-detalles">
+        <h5><i class="bi bi-calendar-check"></i> Detalles de tu Cita</h5>
         
-        .header-bar {
-            background: linear-gradient(90deg, #0d47a1 0%, #1976d2 100%);
-            padding: 15px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+        <div class="detalle-item">
+            <i class="bi bi-person-fill"></i>
+            <div>
+                <span class="detalle-label">Nombre:</span>
+                <span class="detalle-value">{{ cita.solicitante.get_nombre_completo }}</span>
+            </div>
+        </div>
         
-        .logo {
-            width: 60px;
-            height: 60px;
-            background: #ff6f00;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        <div class="detalle-item">
+            <i class="bi bi-card-text"></i>
+            <div>
+                <span class="detalle-label">Documento:</span>
+                <span class="detalle-value">{{ cita.get_documento_solicitante }}</span>
+            </div>
+        </div>
         
-        .logo i {
-            font-size: 2rem;
-            color: white;
-        }
+        <div class="detalle-item">
+            <i class="bi bi-calendar-event"></i>
+            <div>
+                <span class="detalle-label">Fecha:</span>
+                <span class="detalle-value">{{ cita.fecha|date:"l, d \d\e F \d\e Y" }}</span>
+            </div>
+        </div>
         
-        .main-title {
-            color: #0d47a1;
-            font-weight: bold;
-            font-size: 2rem;
-            margin: 30px 0 20px 0;
-            text-align: center;
-        }
+        <div class="detalle-item">
+            <i class="bi bi-clock"></i>
+            <div>
+                <span class="detalle-label">Hora:</span>
+                <span class="detalle-value">{{ cita.hora_inicio|time:"h:i A" }} - {{ cita.hora_fin|time:"h:i A" }}</span>
+            </div>
+        </div>
         
-        .confirmacion-container {
-            background: white;
-            border: 2px solid #4caf50;
-            border-radius: 15px;
-            padding: 50px;
-            margin: 30px auto 50px auto;
-            max-width: 700px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+        <div class="detalle-item">
+            <i class="bi bi-envelope"></i>
+            <div>
+                <span class="detalle-label">Email:</span>
+                <span class="detalle-value">{{ cita.solicitante.correo_electronico }}</span>
+            </div>
+        </div>
         
-        .success-icon {
-            width: 100px;
-            height: 100px;
-            background: #4caf50;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px auto;
-            animation: scaleIn 0.5s ease-out;
-        }
-        
-        @keyframes scaleIn {
-            from {
-                transform: scale(0);
-            }
-            to {
-                transform: scale(1);
-            }
-        }
-        
-        .success-icon i {
-            font-size: 4rem;
-            color: white;
-        }
-        
-        .success-title {
-            color: #4caf50;
-            font-weight: bold;
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-        
-        .success-message {
-            color: #424242;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-        }
-        
-        .cita-detalles {
-            background: #f5f5f5;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 30px;
-            margin: 30px 0;
-            text-align: left;
-        }
-        
-        .cita-detalles h5 {
-            color: #0d47a1;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .detalle-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: white;
-            border-radius: 8px;
-            border-left: 4px solid #0d47a1;
-        }
-        
-        .detalle-item i {
-            font-size: 1.5rem;
-            color: #0d47a1;
-            margin-right: 15px;
-            width: 30px;
-        }
-        
-        .detalle-item .detalle-label {
-            font-weight: 500;
-            color: #757575;
-            margin-right: 10px;
-        }
-        
-        .detalle-item .detalle-value {
-            font-weight: bold;
-            color: #212121;
-        }
-        
-        .info-importante {
-            background: #fff3e0;
-            border-left: 4px solid #ff6f00;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 30px 0;
-            text-align: left;
-        }
-        
-        .info-importante h6 {
-            color: #e65100;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        
-        .info-importante ul {
-            margin-bottom: 0;
-            padding-left: 20px;
-        }
-        
-        .info-importante li {
-            color: #424242;
-            margin-bottom: 10px;
-        }
-        
-        .btn-home {
-            background-color: #0d47a1;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 40px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        
-        .btn-home:hover {
-            background-color: #1565c0;
-            color: white;
-        }
-        
-        .footer {
-            background: #f5f5f5;
-            padding: 20px 0;
-            text-align: center;
-            color: #757575;
-            border-top: 1px solid #e0e0e0;
-            margin-top: 50px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <div class="header-bar">
-        <div class="container">
-            <div class="logo">
-                <i class="bi bi-headset"></i>
+        <div class="detalle-item">
+            <i class="bi bi-phone"></i>
+            <div>
+                <span class="detalle-label">Celular:</span>
+                <span class="detalle-value">{{ cita.solicitante.celular }}</span>
             </div>
         </div>
     </div>
-
-    <!-- Main Content -->
-    <div class="container">
-        <h1 class="main-title">Confirmación de Cita</h1>
-        
-        <div class="confirmacion-container">
-            <div class="success-icon">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-            
-            <h2 class="success-title">¡Cita Agendada Exitosamente!</h2>
-            
-            <p class="success-message">
-                Tu cita ha sido registrada correctamente. Recibirás un correo electrónico con los detalles.
-            </p>
-            
-            <div class="cita-detalles">
-                <h5><i class="bi bi-calendar-check"></i> Detalles de tu Cita</h5>
-                
-                <div class="detalle-item">
-                    <i class="bi bi-person-fill"></i>
-                    <div>
-                        <span class="detalle-label">Nombre:</span>
-                        <span class="detalle-value">{{ cita.solicitante.get_nombre_completo }}</span>
-                    </div>
-                </div>
-                
-                <div class="detalle-item">
-                    <i class="bi bi-card-text"></i>
-                    <div>
-                        <span class="detalle-label">Documento:</span>
-                        <span class="detalle-value">{{ cita.get_documento_solicitante }}</span>
-                    </div>
-                </div>
-                
-                <div class="detalle-item">
-                    <i class="bi bi-calendar-event"></i>
-                    <div>
-                        <span class="detalle-label">Fecha:</span>
-                        <span class="detalle-value">{{ cita.fecha|date:"l, d \d\e F \d\e Y" }}</span>
-                    </div>
-                </div>
-                
-                <div class="detalle-item">
-                    <i class="bi bi-clock"></i>
-                    <div>
-                        <span class="detalle-label">Hora:</span>
-                        <span class="detalle-value">{{ cita.hora_inicio|time:"h:i A" }} - {{ cita.hora_fin|time:"h:i A" }}</span>
-                    </div>
-                </div>
-                
-                <div class="detalle-item">
-                    <i class="bi bi-envelope"></i>
-                    <div>
-                        <span class="detalle-label">Email:</span>
-                        <span class="detalle-value">{{ cita.solicitante.correo_electronico }}</span>
-                    </div>
-                </div>
-                
-                <div class="detalle-item">
-                    <i class="bi bi-phone"></i>
-                    <div>
-                        <span class="detalle-label">Celular:</span>
-                        <span class="detalle-value">{{ cita.solicitante.celular }}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="info-importante">
-                <h6><i class="bi bi-exclamation-triangle-fill"></i> Información Importante:</h6>
-                <ul>
-                    <li>Guarda esta información para tus registros</li>
-                    <li>Recibirás un correo de confirmación</li>
-                    <li>Si necesitas cancelar, hazlo con al menos 2 horas de anticipación</li>
-                    <li>El enlace de la videollamada será enviado por correo electrónico</li>
-                    <li>Ten a la mano tu documento de identidad para la cita</li>
-                </ul>
-            </div>
-            
-            <a href="{% url 'home' %}" class="btn btn-home">
-                <i class="bi bi-house-fill"></i> Volver al Inicio
-            </a>
-        </div>
+    
+    <div class="info-importante">
+        <h6><i class="bi bi-exclamation-triangle-fill"></i> Información Importante:</h6>
+        <ul>
+            <li>Guarda esta información para tus registros</li>
+            <li>Recibirás un correo de confirmación</li>
+            <li>Si necesitas cancelar, hazlo con al menos 2 horas de anticipación</li>
+            <li>El enlace de la videollamada será enviado por correo electrónico</li>
+            <li>Ten a la mano tu documento de identidad para la cita</li>
+        </ul>
     </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <div class="container">
-            <p class="mb-0">&copy; 2024 Sistema de Agendamiento ATENEA.</p>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    
+    <a href="{% url 'home' %}" class="btn btn-home">
+        <i class="bi bi-house-fill"></i> Volver al Inicio
+    </a>
+</div>
+{% endblock %}
