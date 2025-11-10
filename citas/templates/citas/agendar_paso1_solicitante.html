@@ -6,7 +6,7 @@
 
 {% block extra_css %}
 <style>
-    .datos-encontrados {
+    #mensajeDatosEncontrados.datos-encontrados {
         background: #c8e6c9;
         border-left: 4px solid #4caf50;
         padding: 15px;
@@ -15,9 +15,14 @@
         display: none;
     }
     
-    .datos-encontrados.show {
+    #mensajeDatosEncontrados.datos-encontrados.show {
         display: block;
         animation: slideDown 0.3s ease-out;
+        background: #c8e6c9;
+        border-left: 4px solid #4caf50;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 25px;
     }
     
     @keyframes slideDown {
@@ -61,8 +66,8 @@
         Por favor completa toda la información para poder agendar tu cita.
     </div>
     
-    <!-- Mensaje de datos encontrados -->
-    <div class="datos-encontrados" id="mensajeDatosEncontrados">
+    <!-- Mensaje de datos encontrados - INICIA OCULTO -->
+    <div class="datos-encontrados d-none" id="mensajeDatosEncontrados">
         <i class="bi bi-check-circle-fill"></i>
         <strong>¡Encontramos tus datos!</strong> Hemos cargado tu información previa. Puedes actualizarla si es necesario.
     </div>
@@ -365,9 +370,12 @@
                 
                 if (data.success && data.encontrado) {
                     llenarFormulario(data.datos);
+                    mensajeDatosEncontrados.classList.remove('d-none');
                     mensajeDatosEncontrados.classList.add('show');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else if (data.success && !data.encontrado) {
+                    mensajeDatosEncontrados.classList.remove('show');
+                    mensajeDatosEncontrados.classList.add('d-none');
                     console.log('No se encontraron datos previos para este documento');
                 } else {
                     console.error('Error al buscar datos:', data);
