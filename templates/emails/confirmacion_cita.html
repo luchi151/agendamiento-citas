@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmación de Cita - ATENEA</title>
+    <title>Confirmación de Agendamiento - ATENEA</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,18 +63,41 @@
             text-align: center;
             margin: 20px 0;
         }
-        .info-box {
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .teams-link-box {
             background: #e3f2fd;
-            border-left: 4px solid #1976d2;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        .teams-link-box a {
+            display: inline-block;
+            background: #1976d2;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .teams-link-box a:hover {
+            background: #1565c0;
         }
         .details {
             background: #f5f5f5;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
+        }
+        .details h3 {
+            color: #0d47a1;
+            margin-top: 0;
+            font-size: 18px;
         }
         .detail-row {
             display: flex;
@@ -93,23 +116,43 @@
             color: #212121;
             flex: 1;
         }
-        .important {
+        .recommendations {
             background: #fff3e0;
             border-left: 4px solid #ff6f00;
-            padding: 15px;
+            padding: 20px;
             margin: 20px 0;
             border-radius: 5px;
         }
-        .important h3 {
+        .recommendations h3 {
             color: #e65100;
             margin-top: 0;
             font-size: 16px;
         }
-        .important ul {
+        .recommendations ul {
             margin: 10px 0;
             padding-left: 20px;
         }
-        .important li {
+        .recommendations li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .policy-box {
+            background: #ffebee;
+            border-left: 4px solid #d32f2f;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .policy-box h3 {
+            color: #c62828;
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .policy-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .policy-box li {
             margin-bottom: 8px;
         }
         .footer {
@@ -120,15 +163,17 @@
             color: #757575;
             font-size: 14px;
         }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #0d47a1;
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
+        .auto-message {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
             margin: 20px 0;
-            font-weight: bold;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .auto-message strong {
+            color: #d32f2f;
+            font-size: 15px;
         }
     </style>
 </head>
@@ -136,7 +181,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">🎧</div>
-            <h1>Sistema de Agendamiento ATENEA</h1>
+            <h1>Confirmación de Agendamiento</h1>
         </div>
         
         <div class="success-icon">
@@ -145,11 +190,30 @@
         
         <h2>¡Cita Confirmada!</h2>
         
-        <p>Hola <strong>{{ cita.solicitante.nombre }} {{ cita.solicitante.apellido }}</strong>,</p>
+        <div class="greeting">
+            <p>Hola <strong>{{ cita.solicitante.nombre }} {{ cita.solicitante.apellido }}</strong>,</p>
+            
+            <p>ATENEA te confirma el agendamiento de tu cita de atención por videollamada en el siguiente link:</p>
+        </div>
         
-        <p>Tu cita ha sido agendada exitosamente. A continuación encontrarás los detalles:</p>
+        <!-- Link de Teams -->
+        <div class="teams-link-box">
+            <p style="margin: 0 0 10px 0; color: #1976d2; font-weight: bold;">
+                🎥 Enlace de Videollamada
+            </p>
+            {% if cita.url_teams %}
+                <a href="{{ cita.url_teams }}" target="_blank">Unirse a la Reunión de Teams</a>
+                <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                    {{ cita.url_teams }}
+                </p>
+            {% else %}
+                <p style="color: #666; margin: 0;">El enlace de la videollamada se enviará próximamente.</p>
+            {% endif %}
+        </div>
         
+        <!-- Detalles de la Cita -->
         <div class="details">
+            <h3>📋 A continuación encontrarás los detalles:</h3>
             <div class="detail-row">
                 <span class="detail-label">📅 Fecha:</span>
                 <span class="detail-value">{{ cita.fecha|date:"l, d \d\e F \d\e Y" }}</span>
@@ -170,30 +234,22 @@
                 <span class="detail-label">📱 Celular:</span>
                 <span class="detail-value">{{ cita.solicitante.celular }}</span>
             </div>
-            {% if cita.url_teams %}
-            <div class="detail-row">
-                <span class="detail-label">🎥 Videollamada:</span>
-                <span class="detail-value"><a href="{{ cita.url_teams }}">Unirse a la reunión</a></span>
-            </div>
-            {% endif %}
         </div>
         
-        <div class="info-box">
-            <strong>📌 Guarda este correo</strong> para tener a mano los detalles de tu cita.
-        </div>
-        
-        <div class="important">
-            <h3>⚠️ Información Importante:</h3>
+        <!-- Recomendaciones -->
+        <div class="recommendations">
+            <h3>⚠️ Ten en cuenta las siguientes recomendaciones:</h3>
             <ul>
-                <li>Por favor, conéctate a tiempo para tu cita</li>
-                <li>Ten a la mano tu documento de identidad</li>
-                <li>{% if cita.url_teams %}El enlace de la videollamada está arriba{% else %}Recibirás el enlace de la videollamada antes de tu cita{% endif %}</li>
-                <li>Si necesitas cancelar, hazlo con al menos 2 horas de anticipación</li>
-                <li>Puedes cancelar tu cita desde nuestro sitio web</li>
+                <li>Llega 10 minutos antes de la hora programada.</li>
+                <li>El tiempo máximo permitido para realizar una cancelación es hasta 1 hora antes del horario programado.</li>
+                <li>No olvides presentarte con tu documento de identidad.</li>
+                <li>Recuerda que la persona que asista a la cita agendada debe ser la misma que registró los datos de agendamiento.</li>
+                <li>Recuerda que la información suministrada deberá ser veraz, completa, exacta, actualizada, correcta y comprobable, a fin de asegurar tu atención. <strong>Ley 1581 de 2012 Art. 4.</strong></li>
             </ul>
         </div>
-
-        <div class="important">
+        
+        <!-- Política de Agendamiento -->
+        <div class="policy-box">
             <h3>📋 Política de Agendamiento:</h3>
             <ul>
                 <li><strong>Solo puedes tener 1 cita activa a la vez</strong></li>
@@ -202,9 +258,15 @@
             </ul>
         </div>
         
+        <!-- Mensaje Automático -->
+        <div class="auto-message">
+            <p>
+                <strong>Este correo ha sido generado automáticamente, por favor no lo respondas.</strong>
+            </p>
+        </div>
+        
         <div class="footer">
             <p><strong>Sistema de Agendamiento ATENEA</strong></p>
-            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
             <p>© 2024 ATENEA. Todos los derechos reservados.</p>
         </div>
     </div>
