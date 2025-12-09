@@ -49,7 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'usuarios.middleware.AsesorRedirectMiddleware',
+    #'usuarios.middleware.AsesorRedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -284,7 +284,7 @@ DISABLE_SSL_VERIFY = config('DISABLE_SSL_VERIFY', default=True, cast=bool)
 
 if not DEBUG:
     # Configuración de seguridad solo en producción
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
