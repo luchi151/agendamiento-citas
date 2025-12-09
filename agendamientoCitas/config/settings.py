@@ -276,7 +276,7 @@ LOGGING = {
 # ============================================
 
 # ⚠️ CRÍTICO: Cambiar a False en producción
-DISABLE_SSL_VERIFY = config('DISABLE_SSL_VERIFY', default=False, cast=bool)
+DISABLE_SSL_VERIFY = config('DISABLE_SSL_VERIFY', default=True, cast=bool)
 
 # ============================================
 # SEGURIDAD ADICIONAL (PRODUCCIÓN)
