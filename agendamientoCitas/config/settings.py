@@ -173,7 +173,7 @@ DEFAULT_FROM_EMAIL = f'ATENEA Sistema de Citas <{EMAIL_HOST_USER}>'
 ADMIN_EMAIL = EMAIL_HOST_USER
 
 # URL del sitio
-SITE_URL = config('SITE_URL', default='http://localhost:8000')
+SITE_URL = config('SITE_URL', default='https://ateneavideollamada.ddns.net/')
 
 # ============================================
 # MICROSOFT TEAMS / GRAPH API
