@@ -255,6 +255,7 @@
     // Establecer fecha mínima (hoy + 2 horas)
     document.addEventListener('DOMContentLoaded', function() {
         const fechaInput = document.querySelector('[name="fecha"]');
+        const horaSelect = document.querySelector('[name="hora_inicio"]');
         const today = new Date();
         
         // Fecha mínima: mañana
@@ -268,6 +269,54 @@
         const maxDate = new Date(today);
         maxDate.setMonth(maxDate.getMonth() + 3);
         fechaInput.setAttribute('max', maxDate.toISOString().split('T')[0]);
+        
+        // NUEVA FUNCIONALIDAD: Actualizar horas disponibles al cambiar fecha
+        fechaInput.addEventListener('change', async function() {
+            const fechaSeleccionada = this.value;
+            
+            if (!fechaSeleccionada) {
+                return;
+            }
+            
+            // Mostrar loading
+            horaSelect.innerHTML = '<option value="">Cargando horas...</option>';
+            horaSelect.disabled = true;
+            
+            try {
+                const response = await fetch(
+                    `/citas/api/horas-disponibles/?fecha=${encodeURIComponent(fechaSeleccionada)}`
+                );
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Limpiar select
+                    horaSelect.innerHTML = '<option value="">Seleccione una hora</option>';
+                    
+                    // Agregar horas disponibles
+                    data.horas.forEach(function(hora) {
+                        const option = document.createElement('option');
+                        option.value = hora.value;
+                        option.textContent = hora.display;
+                        horaSelect.appendChild(option);
+                    });
+                    
+                    // Mensaje si no hay horas disponibles
+                    if (data.horas.length === 0) {
+                        horaSelect.innerHTML = '<option value="">No hay horas disponibles para esta fecha</option>';
+                    }
+                } else {
+                    horaSelect.innerHTML = '<option value="">Error al cargar horas</option>';
+                    alert(data.message || 'Error al cargar las horas disponibles');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                horaSelect.innerHTML = '<option value="">Error al cargar horas</option>';
+                alert('Error de conexión al cargar las horas disponibles');
+            } finally {
+                horaSelect.disabled = false;
+            }
+        });
     });
 </script>
 {% endblock %}

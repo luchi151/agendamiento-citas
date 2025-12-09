@@ -689,3 +689,91 @@ def buscar_solicitante_api(request):
             'encontrado': False,
             'message': 'No encontramos registros previos con este documento.'
         })
+    
+@require_http_methods(["GET"])
+def obtener_horas_disponibles_api(request):
+    """
+    API endpoint para obtener horas disponibles según la fecha seleccionada
+    """
+    from datetime import datetime
+    
+    fecha_str = request.GET.get('fecha')
+    
+    if not fecha_str:
+        return JsonResponse({
+            'success': False,
+            'message': 'Falta el parámetro de fecha'
+        }, status=400)
+    
+    try:
+        # Convertir string a fecha
+        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        
+        # Validar que sea martes, miércoles o jueves
+        dia_semana = fecha.weekday()
+        if dia_semana not in [1, 2, 3]:
+            return JsonResponse({
+                'success': False,
+                'message': 'Solo se permiten martes, miércoles o jueves'
+            }, status=400)
+        
+        # Generar todas las horas posibles
+        horas_disponibles = []
+        
+        # 7:00 AM - 12:40 PM (cada 20 minutos)
+        hora = 7
+        minuto = 0
+        while hora < 13 or (hora == 12 and minuto <= 40):
+            horas_disponibles.append(f"{hora:02d}:{minuto:02d}:00")
+            minuto += 20
+            if minuto >= 60:
+                minuto = 0
+                hora += 1
+        
+        # 2:20 PM - 4:20 PM (cada 20 minutos) - Martes y Miércoles
+        # 2:00 PM - 4:20 PM (cada 20 minutos) - Jueves
+        if dia_semana in [1, 2]:  # Martes y Miércoles
+            inicio_tarde = 14
+            minuto_inicio = 20
+        else:  # Jueves
+            inicio_tarde = 14
+            minuto_inicio = 0
+        
+        for hora in range(inicio_tarde, 17):
+            for minuto in [0, 20, 40]:
+                if hora == inicio_tarde and minuto < minuto_inicio:
+                    continue
+                if hora == 16 and minuto > 20:
+                    continue
+                horas_disponibles.append(f"{hora:02d}:{minuto:02d}:00")
+        
+        # Obtener horas ya ocupadas
+        citas_ocupadas = Cita.objects.filter(
+            fecha=fecha,
+            estado='agendada'
+        ).values_list('hora_inicio', flat=True)
+        
+        horas_ocupadas = [hora.strftime('%H:%M:%S') for hora in citas_ocupadas]
+        
+        # Filtrar horas disponibles
+        horas_libres = [
+            {'value': hora, 'display': hora[:-3]}  # Quitar los segundos para display
+            for hora in horas_disponibles
+            if hora not in horas_ocupadas
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'horas': horas_libres
+        })
+        
+    except ValueError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Formato de fecha inválido'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        }, status=500)    

@@ -396,7 +396,8 @@ class SeleccionFechaHoraForm(forms.Form):
         widget=forms.DateInput(attrs={
             'class': 'form-control',
             'type': 'date',
-            'required': True
+            'required': True,
+            'id': 'id_fecha'
         }),
         label='Selecciona la fecha de tu cita'
     )
@@ -404,7 +405,8 @@ class SeleccionFechaHoraForm(forms.Form):
     hora_inicio = forms.TimeField(
         widget=forms.Select(attrs={
             'class': 'form-select',
-            'required': True
+            'required': True,
+            'id': 'id_hora_inicio'
         }),
         label='Selecciona la hora'
     )
@@ -421,9 +423,25 @@ class SeleccionFechaHoraForm(forms.Form):
     
     def __init__(self, *args, **kwargs):
         """Personalizar las opciones de hora según disponibilidad"""
+        fecha_seleccionada = kwargs.pop('fecha_seleccionada', None)
         super().__init__(*args, **kwargs)
         
-        # Generar opciones de hora (cada 20 minutos)
+        # Generar todas las opciones de hora disponibles
+        horas_disponibles = self._generar_horas_disponibles()
+        
+        # Si hay fecha seleccionada, filtrar horas ocupadas
+        if fecha_seleccionada:
+            horas_ocupadas = self._obtener_horas_ocupadas(fecha_seleccionada)
+            horas_disponibles = [
+                (hora_valor, hora_display) 
+                for hora_valor, hora_display in horas_disponibles 
+                if hora_valor not in horas_ocupadas
+            ]
+        
+        self.fields['hora_inicio'].widget.choices = [('', 'Seleccione una hora')] + horas_disponibles
+    
+    def _generar_horas_disponibles(self):
+        """Genera todas las horas disponibles para agendar"""
         horas_disponibles = []
         
         # Martes y Miércoles: 7:00-12:40 y 14:20-16:20
@@ -446,12 +464,25 @@ class SeleccionFechaHoraForm(forms.Form):
                     continue  # Solo hasta 16:20
                 horas_disponibles.append((f"{hora:02d}:{minuto:02d}:00", f"{hora:02d}:{minuto:02d}"))
         
-        self.fields['hora_inicio'].widget.choices = [('', 'Seleccione una hora')] + horas_disponibles
+        return horas_disponibles
+    
+    def _obtener_horas_ocupadas(self, fecha):
+        """Obtiene las horas ya ocupadas para una fecha específica"""
+        from .models import Cita
+        from datetime import datetime
         
-        # Jueves: 14:00-16:20
-        # (se agregan las mismas horas de la tarde)
+        citas_agendadas = Cita.objects.filter(
+            fecha=fecha,
+            estado='agendada'
+        ).values_list('hora_inicio', flat=True)
         
-        self.fields['hora_inicio'].widget.choices = [('', 'Seleccione una hora')] + horas_disponibles
+        # Convertir a formato string "HH:MM:SS"
+        horas_ocupadas = [
+            hora.strftime('%H:%M:%S') if isinstance(hora, datetime.time) else str(hora)
+            for hora in citas_agendadas
+        ]
+        
+        return horas_ocupadas
     
     def clean_fecha(self):
         """Validar que la fecha sea válida"""
@@ -519,6 +550,7 @@ class SeleccionFechaHoraForm(forms.Form):
                 raise ValidationError('Ya existe una cita agendada en ese horario. Por favor seleccione otro.')
         
         return cleaned_data
+    
     def validar_cita_activa(self, tipo_documento, numero_documento):
         """
         Validar que el solicitante no tenga otra cita activa
@@ -533,4 +565,4 @@ class SeleccionFechaHoraForm(forms.Form):
             fecha__gte=timezone.now().date()
         ).exists()
         
-        return not cita_activa    
+        return not cita_activa

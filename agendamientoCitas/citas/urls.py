@@ -21,4 +21,5 @@ urlpatterns = [
     
     # API endpoints
     path('api/buscar-solicitante/', views.buscar_solicitante_api, name='api_buscar_solicitante'),
+    path('api/horas-disponibles/', views.obtener_horas_disponibles_api, name='api_horas_disponibles'),
 ]
