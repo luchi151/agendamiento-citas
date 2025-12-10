@@ -49,7 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'usuarios.middleware.AsesorRedirectMiddleware',
+    #'usuarios.middleware.AsesorRedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -173,7 +173,7 @@ DEFAULT_FROM_EMAIL = f'ATENEA Sistema de Citas <{EMAIL_HOST_USER}>'
 ADMIN_EMAIL = EMAIL_HOST_USER
 
 # URL del sitio
-SITE_URL = config('SITE_URL', default='http://localhost:8000')
+SITE_URL = config('SITE_URL', default='https://ateneavideollamada.ddns.net/')
 
 # ============================================
 # MICROSOFT TEAMS / GRAPH API
@@ -284,7 +284,7 @@ DISABLE_SSL_VERIFY = config('DISABLE_SSL_VERIFY', default=True, cast=bool)
 
 if not DEBUG:
     # Configuración de seguridad solo en producción
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
