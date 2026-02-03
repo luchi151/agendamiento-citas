@@ -1,4 +1,5 @@
 {% extends 'citas/base_citas.html' %}
+{% load static %}
 
 {% block title %}Cita Confirmada - ATENEA{% endblock %}
 
@@ -125,6 +126,70 @@
         margin-bottom: 10px;
     }
     
+    /* NUEVA SECCIÓN - Instrucciones Teams */
+    .instrucciones-teams {
+        background: #e3f2fd;
+        border: 2px solid #1976d2;
+        border-radius: 10px;
+        padding: 30px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .instrucciones-teams h5 {
+        color: #0d47a1;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .paso-teams {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid #1976d2;
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .paso-numero {
+        background: #1976d2;
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    
+    .paso-contenido {
+        flex: 1;
+    }
+    
+    .paso-contenido strong {
+        color: #0d47a1;
+        margin-bottom: 5px;
+    }
+    
+    .paso-imagen {
+        margin-top: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        max-width: 100%;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .paso-imagen:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
     .btn-home {
         background-color: #0d47a1;
         color: white;
@@ -138,6 +203,39 @@
     .btn-home:hover {
         background-color: #1565c0;
         color: white;
+    }
+    
+    /* Modal para imágenes */
+    .modal-imagen {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+    }
+    
+    .modal-imagen img {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 90%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
     }
 </style>
 {% endblock %}
@@ -206,14 +304,68 @@
         </div>
     </div>
     
+    <!-- NUEVA SECCIÓN: Instrucciones para conectarse a Teams -->
+    <div class="instrucciones-teams">
+        <h5><i class="bi bi-camera-video-fill"></i> ¿Cómo conectarte a tu videollamada de Teams?</h5>
+        
+        <div class="paso-teams">
+            <div class="paso-numero">1</div>
+            <div class="paso-contenido">
+                <strong>Abre el enlace de Teams desde tu correo</strong>
+                <p>Recibirás un correo con el enlace de la reunión. Haz clic en él.</p>
+                <img src="{% static 'img/teams/paso2.jpg' %}" alt="Paso 2" class="paso-imagen" onclick="abrirImagen(this)">
+            </div>
+        </div>
+        
+        <div class="paso-teams">
+            <div class="paso-numero">2</div>
+            <div class="paso-contenido">
+                <strong>Cancela el popup "¿Abrir Microsoft Teams?"</strong>
+                <p>Aparecerá un aviso en la parte superior de la página preguntando si quieres abrir Teams. Haz clic en <strong>"Cancelar"</strong>.</p>
+                <img src="{% static 'img/teams/paso3.jpg' %}" alt="Paso 3" class="paso-imagen" onclick="abrirImagen(this)">
+            </div>
+        </div>
+        
+        <div class="paso-teams">
+            <div class="paso-numero">3</div>
+            <div class="paso-contenido">
+                <strong>Continúa en el explorador</strong>
+                <p>Haz clic en el botón <strong>"Continuar en este explorador"</strong> o <strong>"Join on the web instead"</strong>.</p>
+                <img src="{% static 'img/teams/paso4.jpg' %}" alt="Paso 4" class="paso-imagen" onclick="abrirImagen(this)">
+            </div>
+        </div>
+        
+        <div class="paso-teams">
+            <div class="paso-numero">4</div>
+            <div class="paso-contenido">
+                <strong>Ingresa tu nombre</strong>
+                <p>Escribe tu nombre completo en el campo que aparece.</p>
+            </div>
+        </div>
+        
+        <div class="paso-teams">
+            <div class="paso-numero">5</div>
+            <div class="paso-contenido">
+                <strong>Únete a la reunión</strong>
+                <p>En la parte inferior derecha, haz clic en el botón <strong>"Unirse ahora"</strong> o <strong>"Join now"</strong>.</p>
+                <img src="{% static 'img/teams/paso5.jpg' %}" alt="Paso 5" class="paso-imagen" onclick="abrirImagen(this)">
+            </div>
+        </div>
+        
+        <div class="alert alert-info mt-3">
+            <i class="bi bi-lightbulb-fill"></i>
+            <strong>Consejo:</strong> Te recomendamos usar Google Chrome, Microsoft Edge o Firefox para una mejor experiencia.
+        </div>
+    </div>
+    
     <div class="info-importante">
         <h6><i class="bi bi-exclamation-triangle-fill"></i> Información Importante:</h6>
         <ul>
             <li>Guarda esta información para tus registros</li>
-            <li>Recibirás un correo de confirmación</li>
+            <li>Recibirás un correo de confirmación con el enlace de Teams</li>
             <li>Si necesitas cancelar, hazlo con al menos 2 horas de anticipación</li>
-            <li>El enlace de la videollamada será enviado por correo electrónico</li>
             <li>Ten a la mano tu documento de identidad para la cita</li>
+            <li>Conecta tu cámara y micrófono antes de la reunión</li>
         </ul>
     </div>
     
@@ -221,4 +373,32 @@
         <i class="bi bi-house-fill"></i> Volver al Inicio
     </a>
 </div>
+
+<!-- Modal para ampliar imágenes -->
+<div id="modalImagen" class="modal-imagen" onclick="cerrarImagen()">
+    <span class="modal-close">&times;</span>
+    <img id="imagenAmpliada" src="">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function abrirImagen(img) {
+        var modal = document.getElementById("modalImagen");
+        var modalImg = document.getElementById("imagenAmpliada");
+        modal.style.display = "block";
+        modalImg.src = img.src;
+    }
+    
+    function cerrarImagen() {
+        document.getElementById("modalImagen").style.display = "none";
+    }
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            cerrarImagen();
+        }
+    });
+</script>
 {% endblock %}

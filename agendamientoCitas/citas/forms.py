@@ -60,20 +60,11 @@ class CitaForm(forms.ModelForm):
         dia_semana = fecha.weekday()
         
         # Validar rangos horarios según el día
-        if dia_semana in [1, 2]:  # Martes y Miércoles
-            manana_valido = time(7, 0) <= hora <= time(12, 40)
-            tarde_valido = time(14, 20) <= hora <= time(16, 20)
-            
-            if not (manana_valido or tarde_valido):
+        # Martes, Miércoles y Jueves: 2:00 PM - 4:00 PM
+        if dia_semana in [1, 2, 3]:  # Martes, Miércoles y Jueves
+            if not (time(14, 0) <= hora <= time(16, 0)):
                 raise forms.ValidationError(
-                    'Para martes y miércoles, los horarios disponibles son: '
-                    '7:00 AM - 12:40 PM o 2:20 PM - 4:20 PM'
-                )
-        
-        elif dia_semana == 3:  # Jueves
-            if not (time(14, 0) <= hora <= time(16, 20)):
-                raise forms.ValidationError(
-                    'Para jueves, los horarios disponibles son: 2:00 PM - 4:20 PM'
+                    'Esta fecha ya no cuenta con disponibilidad de agentamiento.'
                 )
         
         return hora
@@ -336,17 +327,17 @@ class SolicitanteForm(forms.ModelForm):
         labels = {
             'tipo_documento': 'Tipo de documento',
             'numero_documento': 'Número de documento',
-            'nombre': 'Nombre',
-            'apellido': 'Apellido',
-            'celular': 'Celular',
+            'nombre': 'Nombres',
+            'apellido': 'Apellidos',
+            'celular': 'Número de celular',
             'correo_electronico': 'Correo electrónico',
-            'sexo': 'Sexo',
+            'sexo': '¿Cuál es tu sexo asignado al nacer?',
             'genero': '¿Cuál es tu género?',
             'orientacion_sexual': '¿Cuál es tu orientación sexual?',
-            'rango_edad': '¿Cuál es tu rango de edad?',
+            'rango_edad': '¿En qué rango de edad te encuentras?',
             'nivel_educativo': '¿Cuál es tu nivel educativo?',
             'grupo_etnico': '¿Perteneces a algún grupo étnico?',
-            'grupo_poblacional': '¿Perteneces a alguno de los siguientes grupos poblacionales?',
+            'grupo_poblacional': '¿Perteneces a alguna de las siguientes poblaciones?',
             'estrato_socioeconomico': '¿En qué estrato socioeconómico vives?',
             'localidad': '¿En qué localidad vives?',
             'calidad_comunicacion': 'Te comunicas en calidad de',
@@ -444,24 +435,11 @@ class SeleccionFechaHoraForm(forms.Form):
         """Genera todas las horas disponibles para agendar"""
         horas_disponibles = []
         
-        # Martes y Miércoles: 7:00-12:40 y 14:20-16:20
-        # 7:00 AM - 12:40 PM (cada 20 minutos)
-        hora = 7
-        minuto = 0
-        while hora < 13 or (hora == 12 and minuto <= 40):
-            horas_disponibles.append((f"{hora:02d}:{minuto:02d}:00", f"{hora:02d}:{minuto:02d}"))
-            minuto += 20
-            if minuto >= 60:
-                minuto = 0
-                hora += 1
-        
-        # 2:20 PM - 4:20 PM (cada 20 minutos)
-        for hora in range(14, 17):
+        # Horarios de 14:00 a 16:00 con intervalos de 20 minutos
+        for hora in range(14, 17):  # 14:00 a 16:40
             for minuto in [0, 20, 40]:
-                if hora == 14 and minuto == 0:
-                    continue  # Saltar 14:00
-                if hora == 16 and minuto > 20:
-                    continue  # Solo hasta 16:20
+                if hora == 16 and minuto > 0:
+                    continue  # Solo hasta 16:00
                 horas_disponibles.append((f"{hora:02d}:{minuto:02d}:00", f"{hora:02d}:{minuto:02d}"))
         
         return horas_disponibles
@@ -486,26 +464,26 @@ class SeleccionFechaHoraForm(forms.Form):
     
     def clean_fecha(self):
         """Validar que la fecha sea válida"""
+        from datetime import datetime, timedelta
+        from django.utils import timezone
+        
         fecha = self.cleaned_data.get('fecha')
         
         if not fecha:
-            raise ValidationError('Debe seleccionar una fecha.')
+            return fecha
         
-        # No puede ser en el pasado
-        if fecha < timezone.now().date():
-            raise ValidationError('No puede agendar una cita en el pasado.')
+        # Validar que no sea una fecha pasada
+        hoy = timezone.now().date()
+        if fecha < hoy:
+            raise forms.ValidationError('No puedes agendar citas en fechas pasadas.')
         
-        # Debe ser martes (1), miércoles (2) o jueves (3)
+        # Validar que sea martes, miércoles o jueves
         dia_semana = fecha.weekday()
         if dia_semana not in [1, 2, 3]:
-            raise ValidationError('Solo puede agendar citas los martes, miércoles o jueves.')
+            raise forms.ValidationError('Solo se permiten citas los días martes, miércoles o jueves.')
         
-        # Validar antelación mínima (al menos 2 horas desde ahora)
-        ahora = timezone.now()
-        fecha_hora = timezone.make_aware(datetime.combine(fecha, datetime.min.time()))
-        
-        if (fecha_hora.date() == ahora.date()) and (fecha_hora < ahora + timedelta(hours=2)):
-            raise ValidationError('Debe agendar con al menos 2 horas de antelación.')
+        # NO validamos las 2 horas aquí porque eso se hace por hora específica
+        # en el método clean() y en el API
         
         return fecha
     
@@ -516,6 +494,9 @@ class SeleccionFechaHoraForm(forms.Form):
         hora_inicio = cleaned_data.get('hora_inicio')
         
         if fecha and hora_inicio:
+            from datetime import datetime, time, timedelta
+            from django.utils import timezone
+            
             # Validar que el horario sea válido para el día seleccionado
             dia_semana = fecha.weekday()
             
@@ -523,20 +504,28 @@ class SeleccionFechaHoraForm(forms.Form):
             if isinstance(hora_inicio, str):
                 hora_inicio = datetime.strptime(hora_inicio, '%H:%M:%S').time()
             
-            if dia_semana in [1, 2]:  # Martes y Miércoles
-                # 7:00-12:40 o 14:20-16:20
-                from datetime import time
-                manana_valido = time(7, 0) <= hora_inicio <= time(12, 40)
-                tarde_valido = time(14, 20) <= hora_inicio <= time(16, 20)
-                
-                if not (manana_valido or tarde_valido):
+            # Martes, Miércoles y Jueves: 2:00 PM - 4:00 PM
+            if dia_semana in [1, 2, 3]:
+                if not (time(14, 0) <= hora_inicio <= time(16, 0)):
                     raise ValidationError('El horario seleccionado no está disponible para el día elegido.')
+            else:
+                raise ValidationError('Ya no contamos con agenda disponible para este día, por favor seleccione otro.')
             
-            elif dia_semana == 3:  # Jueves
-                # 14:00-16:20
-                from datetime import time
-                if not (time(14, 0) <= hora_inicio <= time(16, 20)):
-                    raise ValidationError('El horario seleccionado no está disponible para el día elegido.')
+            # ===== VALIDACIÓN DE 2 HORAS DE ANTELACIÓN =====
+            ahora = timezone.now()
+            fecha_hora_cita = timezone.make_aware(
+                datetime.combine(fecha, hora_inicio)
+            )
+            
+            # Calcular diferencia en horas
+            diferencia = fecha_hora_cita - ahora
+            horas_diferencia = diferencia.total_seconds() / 3600
+            
+            if horas_diferencia < 2:
+                raise ValidationError(
+                    'Debes agendar tu cita con al menos 2 horas de antelación. '
+                    f'La cita debe ser después de las {(ahora + timedelta(hours=2)).strftime("%I:%M %p")} del día {ahora.strftime("%d/%m/%Y")}.'
+                )
             
             # Validar que no exista otra cita en ese horario
             from django.db.models import Q

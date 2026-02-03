@@ -161,8 +161,7 @@
     <div class="horario-info">
         <h6><i class="bi bi-clock"></i> Horarios de Atención:</h6>
         <ul>
-            <li><strong>Martes y Miércoles:</strong> 7:00 AM - 12:40 PM y 2:20 PM - 4:20 PM</li>
-            <li><strong>Jueves:</strong> 2:00 PM - 4:20 PM</li>
+            <li><strong>Lunes a viernes:</strong> 7:00 AM a 4:40 PM</li>
         </ul>
         <p class="mb-0 mt-2"><small><em>Las citas tienen una duración de 20 minutos.</em></small></p>
     </div>
@@ -259,10 +258,14 @@
         const today = new Date();
         
         // Fecha mínima: mañana
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        // const tomorrow = new Date(today);
+        // tomorrow.setDate(tomorrow.getDate() + 1);
         
-        const minDate = tomorrow.toISOString().split('T')[0];
+        // const minDate = tomorrow.toISOString().split('T')[0];
+        // fechaInput.setAttribute('min', minDate);
+
+        // Fecha mínima: hoy (no mañana)
+        const minDate = today.toISOString().split('T')[0];
         fechaInput.setAttribute('min', minDate);
         
         // Fecha máxima: 3 meses adelante

@@ -1,5 +1,4 @@
 # citas/utils.py
-# REEMPLAZAR la función crear_reunion_teams_automatica
 
 import logging
 from datetime import datetime

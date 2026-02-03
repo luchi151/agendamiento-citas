@@ -76,14 +76,14 @@ class Solicitante(models.Model):
     ]
     
     GRUPO_POBLACIONAL_CHOICES = [
-        ('ninguno', 'Ninguno'),
+        ('campesino', 'Campesino'),
+        ('migrante_nacional', 'Migrante Nacional'),
+        ('migrante_internacional', 'Migrante Internacional'),
         ('victima_conflicto', 'Víctima del conflicto armado'),
-        ('desplazado', 'Desplazado'),
-        ('reinsertado', 'Reinsertado'),
-        ('habitante_calle', 'Habitante de calle'),
-        ('lgbtiq', 'LGBTIQ+'),
-        ('migrante', 'Migrante'),
-        ('otro', 'Otro'),
+        ('palenquero', 'Palenquero'),
+        ('veterano', 'Veterano'),
+        ('ninguno', 'Ninguno'),
+        ('no_responde', 'No responde'),
     ]
     
     ESTRATO_CHOICES = [
@@ -93,6 +93,7 @@ class Solicitante(models.Model):
         ('4', 'Estrato 4'),
         ('5', 'Estrato 5'),
         ('6', 'Estrato 6'),
+        ('7', 'No responde'),
     ]
     
     LOCALIDAD_CHOICES = [
@@ -116,15 +117,15 @@ class Solicitante(models.Model):
         ('rafael_uribe', 'Rafael Uribe Uribe'),
         ('ciudad_bolivar', 'Ciudad Bolívar'),
         ('sumapaz', 'Sumapaz'),
-        ('fuera_bogota', 'Fuera de Bogotá'),
+        ('fuera_bogota', 'No reside en Bogotá'),
     ]
     
     CALIDAD_CHOICES = [
-        ('propio', 'Propio'),
-        ('familiar', 'Familiar'),
-        ('amigo', 'Amigo'),
+        ('aspirante1', 'Aspirante1'),
+        ('beneficiario', 'Beneficiario'),
+        ('acudiente', 'Acudiente'),
         ('representante_legal', 'Representante Legal'),
-        ('otro', 'Otro'),
+        ('ciudadania_general', 'Ciudadanía en General'),
     ]
     
     # Campos de identificación (obligatorios)
@@ -502,6 +503,8 @@ class Cita(models.Model):
         Valida si el horario está dentro de los horarios permitidos
         Martes y Miércoles: 7:00-12:40 y 14:20-16:20
         Jueves: 14:00-16:20
+
+        Se corrige a martes miercoles jueves y viernes de 14:00 a 16:00
         """
         dia_semana = self.fecha.weekday()  # 0=Lunes, 1=Martes, ..., 6=Domingo
         
@@ -511,15 +514,16 @@ class Cita(models.Model):
         
         hora = self.hora_inicio
         
-        if dia_semana in [1, 2]:  # Martes y Miércoles
-            # 7:00 AM - 12:40 PM o 2:20 PM - 4:20 PM
-            manana_valido = time(7, 0) <= hora <= time(12, 40)
-            tarde_valido = time(14, 20) <= hora <= time(16, 20)
-            return manana_valido or tarde_valido
+        return time(14, 0) <= hora <= time(16, 0)
+        # if dia_semana in [1, 2]:  # Martes y Miércoles
+        #     # 7:00 AM - 12:40 PM o 2:20 PM - 4:20 PM
+        #     manana_valido = time(7, 0) <= hora <= time(12, 40)
+        #     tarde_valido = time(14, 20) <= hora <= time(16, 20)
+        #     return manana_valido or tarde_valido
         
-        elif dia_semana == 3:  # Jueves
-            # 2:00 PM - 4:20 PM
-            return time(14, 0) <= hora <= time(16, 20)
+        # elif dia_semana == 3:  # Jueves
+        #     # 2:00 PM - 4:20 PM
+        #     return time(14, 0) <= hora <= time(16, 20)
         
         return False
     
